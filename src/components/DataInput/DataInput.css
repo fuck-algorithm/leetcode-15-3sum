@@ -1,0 +1,102 @@
+.data-input {
+  padding: 8px 16px;
+  background: var(--card-bg);
+  border-bottom: 1px solid var(--border-color);
+  flex-shrink: 0;
+}
+
+.input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.input-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.input-field {
+  flex: 1;
+  max-width: 400px;
+  padding: 6px 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 13px;
+  transition: border-color 0.2s;
+}
+
+.input-field:focus {
+  border-color: var(--primary-color);
+}
+
+.input-field.input-error {
+  border-color: var(--error-color);
+}
+
+.apply-btn {
+  padding: 6px 14px;
+  background: var(--primary-color);
+  color: white;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.apply-btn:hover {
+  background: var(--primary-hover);
+}
+
+.random-btn {
+  padding: 6px 14px;
+  background: var(--success-color);
+  color: white;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.random-btn:hover {
+  background: #059669;
+}
+
+.error-message {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--error-color);
+}
+
+.examples-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.examples-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.example-btn {
+  padding: 3px 10px;
+  background: #f1f5f9;
+  color: var(--text-secondary);
+  border-radius: 4px;
+  font-size: 12px;
+  transition: all 0.2s;
+}
+
+.example-btn:hover {
+  background: #e2e8f0;
+  color: var(--text-primary);
+}
+
+.example-btn.active {
+  background: var(--primary-color);
+  color: white;
+}

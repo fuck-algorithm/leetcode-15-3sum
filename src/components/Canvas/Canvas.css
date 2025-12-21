@@ -1,0 +1,127 @@
+.canvas-container {
+  flex: 1;
+  position: relative;
+  background: var(--card-bg);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+}
+
+.canvas-container svg {
+  display: block;
+  cursor: grab;
+}
+
+.canvas-container svg:active {
+  cursor: grabbing;
+}
+
+.canvas-hint {
+  position: absolute;
+  bottom: 8px;
+  right: 12px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.9);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+/* 数组单元格 */
+.array-cell {
+  fill: #f1f5f9;
+  stroke: #e2e8f0;
+  stroke-width: 1;
+  transition: all 0.3s ease;
+}
+
+.array-cell.i {
+  fill: #dbeafe;
+  stroke: var(--highlight-i);
+  stroke-width: 2;
+}
+
+.array-cell.left {
+  fill: #d1fae5;
+  stroke: var(--highlight-left);
+  stroke-width: 2;
+}
+
+.array-cell.right {
+  fill: #fef3c7;
+  stroke: var(--highlight-right);
+  stroke-width: 2;
+}
+
+.array-cell.found {
+  fill: #fce7f3;
+  stroke: var(--highlight-found);
+  stroke-width: 2;
+}
+
+.array-cell.skip {
+  fill: #f1f5f9;
+  stroke: var(--highlight-skip);
+  stroke-width: 2;
+  opacity: 0.6;
+}
+
+.cell-value {
+  font-size: 14px;
+  font-weight: 600;
+  fill: var(--text-primary);
+  text-anchor: middle;
+  dominant-baseline: middle;
+}
+
+.cell-index {
+  font-size: 10px;
+  fill: var(--text-secondary);
+  text-anchor: middle;
+}
+
+/* 标题 */
+.section-title {
+  font-size: 12px;
+  font-weight: 600;
+  fill: var(--text-secondary);
+}
+
+/* 变量 */
+.var-name {
+  font-size: 12px;
+  fill: var(--text-secondary);
+}
+
+.var-value {
+  font-size: 12px;
+  font-family: 'Fira Code', monospace;
+  fill: var(--text-primary);
+}
+
+.var-name.highlight,
+.var-value.highlight {
+  fill: var(--highlight-found);
+  font-weight: 600;
+}
+
+/* 结果 */
+.result-cell {
+  fill: #ecfdf5;
+  stroke: var(--success-color);
+  stroke-width: 1;
+}
+
+.result-value {
+  font-size: 12px;
+  font-weight: 600;
+  fill: #047857;
+  text-anchor: middle;
+}
+
+/* 步骤描述 */
+.step-description {
+  font-size: 13px;
+  fill: var(--text-primary);
+  font-weight: 500;
+}
