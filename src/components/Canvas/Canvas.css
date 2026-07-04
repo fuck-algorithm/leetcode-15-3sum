@@ -27,6 +27,66 @@
   border-radius: 4px;
 }
 
+/* 顶部步骤说明 */
+.stage-panel-bg,
+.info-panel-bg {
+  fill: #ffffff;
+  stroke: var(--border-color);
+  stroke-width: 1;
+  filter: drop-shadow(0 8px 18px rgba(15, 23, 42, 0.06));
+}
+
+.stage-kicker {
+  font-size: 13px;
+  font-weight: 700;
+  fill: var(--text-primary);
+}
+
+.decision-action {
+  font-size: 12px;
+  fill: var(--text-secondary);
+}
+
+.relation-badge,
+.relation-pill {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.relation-badge.equal,
+.relation-pill.equal {
+  fill: #db2777;
+}
+
+.relation-badge.less,
+.relation-pill.less {
+  fill: #059669;
+}
+
+.relation-badge.greater,
+.relation-pill.greater {
+  fill: #d97706;
+}
+
+.legend-label {
+  font-size: 11px;
+  fill: var(--text-secondary);
+}
+
+/* 当前搜索窗口 */
+.search-window {
+  fill: rgba(37, 99, 235, 0.06);
+  stroke: rgba(37, 99, 235, 0.28);
+  stroke-width: 1;
+  stroke-dasharray: 4 4;
+}
+
+.window-label {
+  font-size: 11px;
+  fill: var(--primary-color);
+  text-anchor: middle;
+}
+
 /* 数组单元格 */
 .array-cell {
   fill: #f1f5f9;
@@ -56,7 +116,7 @@
 .array-cell.found {
   fill: #fce7f3;
   stroke: var(--highlight-found);
-  stroke-width: 2;
+  stroke-width: 3;
 }
 
 .array-cell.skip {
@@ -67,7 +127,7 @@
 }
 
 .cell-value {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   fill: var(--text-primary);
   text-anchor: middle;
@@ -80,6 +140,32 @@
   text-anchor: middle;
 }
 
+.cell-origin {
+  font-size: 10px;
+  fill: var(--text-secondary);
+  text-anchor: middle;
+}
+
+/* 指针与移动轨迹 */
+.pointer-label {
+  fill: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+  text-anchor: middle;
+}
+
+.move-line {
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.move-label {
+  font-size: 11px;
+  font-weight: 600;
+  fill: var(--text-secondary);
+  text-anchor: middle;
+}
+
 /* 标题 */
 .section-title {
   font-size: 12px;
@@ -88,6 +174,17 @@
 }
 
 /* 变量 */
+.formula-text {
+  font-size: 18px;
+  font-weight: 700;
+  fill: var(--text-primary);
+}
+
+.target-text {
+  font-size: 12px;
+  fill: var(--text-secondary);
+}
+
 .var-name {
   font-size: 12px;
   fill: var(--text-secondary);
@@ -100,19 +197,31 @@
 }
 
 .var-name.highlight,
-.var-value.highlight {
+.var-value.highlight,
+.var-text.highlight {
   fill: var(--highlight-found);
   font-weight: 600;
 }
 
+.var-text {
+  font-size: 12px;
+  font-family: 'Fira Code', monospace;
+  fill: var(--text-primary);
+}
+
 /* 结果 */
-.result-cell {
+.empty-result {
+  font-size: 12px;
+  fill: var(--text-secondary);
+}
+
+.triplet-bg {
   fill: #ecfdf5;
-  stroke: var(--success-color);
+  stroke: rgba(16, 185, 129, 0.45);
   stroke-width: 1;
 }
 
-.result-value {
+.triplet-text {
   font-size: 12px;
   font-weight: 600;
   fill: #047857;
@@ -123,5 +232,5 @@
 .step-description {
   font-size: 13px;
   fill: var(--text-primary);
-  font-weight: 500;
+  font-weight: 600;
 }

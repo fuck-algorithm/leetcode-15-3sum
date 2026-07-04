@@ -1,4 +1,4 @@
-import type { AlgorithmStep, ArrayElementState, VariableState, PointerState } from '../types';
+import type { AlgorithmStep, ArrayElementState, VariableState, PointerState, StepDecision } from '../types';
 
 // 生成算法执行步骤
 export function generateSteps(nums: number[]): AlgorithmStep[] {
@@ -23,7 +23,8 @@ export function generateSteps(nums: number[]): AlgorithmStep[] {
     })),
     [],
     { i: -1, left: -1, right: -1 },
-    'init'
+    'init',
+    { action: '读取原始数组，准备排序后使用双指针扫描' }
   ));
 
   // 特判
@@ -41,7 +42,8 @@ export function generateSteps(nums: number[]): AlgorithmStep[] {
       })),
       [],
       { i: -1, left: -1, right: -1 },
-      'complete'
+      'complete',
+      { action: '不足三个元素，无法组成三元组' }
     ));
     return steps;
   }
@@ -63,7 +65,8 @@ export function generateSteps(nums: number[]): AlgorithmStep[] {
     })),
     [],
     { i: -1, left: -1, right: -1 },
-    'sort'
+    'sort',
+    { action: '排序让双指针可以根据 sum 与 0 的关系单调移动' }
   ));
 
   const result: number[][] = [];
@@ -84,7 +87,8 @@ export function generateSteps(nums: number[]): AlgorithmStep[] {
         createArrayState(indexedNums, i, -1, -1, 'skip'),
         result.slice(),
         { i, left: -1, right: -1 },
-        'skip'
+        'skip',
+        { action: '固定值重复，跳过以避免生成重复三元组', movedPointer: 'i' }
       ));
       continue;
     }
@@ -99,7 +103,8 @@ export function generateSteps(nums: number[]): AlgorithmStep[] {
         createArrayState(indexedNums, i, -1, -1, 'i'),
         result.slice(),
         { i, left: -1, right: -1 },
-        'complete'
+        'complete',
+        { action: '当前固定值已经大于 0，右侧更大，不可能再凑出 0' }
       ));
       break;
     }
@@ -120,7 +125,8 @@ export function generateSteps(nums: number[]): AlgorithmStep[] {
       createArrayState(indexedNums, i, left, right),
       result.slice(),
       { i, left, right },
-      'move-i'
+      'move-i',
+      { target: -sortedNums[i], action: `固定 i，接下来在右侧窗口寻找两数之和 ${-sortedNums[i]}` }
     ));
 
     while (left < right) {
@@ -141,7 +147,13 @@ export function generateSteps(nums: number[]): AlgorithmStep[] {
         createArrayState(indexedNums, i, left, right),
         result.slice(),
         { i, left, right },
-        'compare'
+        'compare',
+        {
+          sum,
+          target,
+          relation: getRelation(sum),
+          action: '计算当前三元组的和，并与 0 比较'
+        }
       ));
 
       if (sum === 0) {
@@ -157,11 +169,19 @@ export function generateSteps(nums: number[]): AlgorithmStep[] {
           createArrayState(indexedNums, i, left, right, 'found'),
           result.slice(),
           { i, left, right },
-          'found'
+          'found',
+          {
+            sum,
+            target,
+            relation: 'equal',
+            action: 'sum 命中 0，记录当前三元组',
+            triplet: [sortedNums[i], sortedNums[left], sortedNums[right]]
+          }
         ));
 
         // 跳过重复的left
         while (left < right && sortedNums[left] === sortedNums[left + 1]) {
+          const previousPointers = { i, left, right };
           left++;
           steps.push(createStep(
             stepId++,
@@ -171,12 +191,21 @@ export function generateSteps(nums: number[]): AlgorithmStep[] {
             createArrayState(indexedNums, i, left, right, 'skip'),
             result.slice(),
             { i, left, right },
-            'skip'
+            'skip',
+            {
+              sum,
+              target,
+              relation: 'equal',
+              action: 'left 右侧仍是相同值，继续跳过重复组合',
+              movedPointer: 'left',
+              previousPointers
+            }
           ));
         }
 
         // 跳过重复的right
         while (left < right && sortedNums[right] === sortedNums[right - 1]) {
+          const previousPointers = { i, left, right };
           right--;
           steps.push(createStep(
             stepId++,
@@ -186,10 +215,19 @@ export function generateSteps(nums: number[]): AlgorithmStep[] {
             createArrayState(indexedNums, i, left, right, 'skip'),
             result.slice(),
             { i, left, right },
-            'skip'
+            'skip',
+            {
+              sum,
+              target,
+              relation: 'equal',
+              action: 'right 左侧仍是相同值，继续跳过重复组合',
+              movedPointer: 'right',
+              previousPointers
+            }
           ));
         }
 
+        const previousPointers = { i, left, right };
         left++;
         right--;
         
@@ -205,10 +243,19 @@ export function generateSteps(nums: number[]): AlgorithmStep[] {
             createArrayState(indexedNums, i, left, right),
             result.slice(),
             { i, left, right },
-            'move-left'
+            'move-left',
+            {
+              sum,
+              target,
+              relation: 'equal',
+              action: '命中后同时收缩两端，继续查找下一组不重复解',
+              movedPointer: 'both',
+              previousPointers
+            }
           ));
         }
       } else if (sum > 0) {
+        const previousPointers = { i, left, right };
         right--;
         steps.push(createStep(
           stepId++,
@@ -221,9 +268,18 @@ export function generateSteps(nums: number[]): AlgorithmStep[] {
           createArrayState(indexedNums, i, left, right),
           result.slice(),
           { i, left, right },
-          'move-right'
+          'move-right',
+          {
+            sum,
+            target,
+            relation: 'greater',
+            action: 'sum 大于 0，右侧值偏大，right 左移以减小总和',
+            movedPointer: 'right',
+            previousPointers
+          }
         ));
       } else {
+        const previousPointers = { i, left, right };
         left++;
         steps.push(createStep(
           stepId++,
@@ -236,7 +292,15 @@ export function generateSteps(nums: number[]): AlgorithmStep[] {
           createArrayState(indexedNums, i, left, right),
           result.slice(),
           { i, left, right },
-          'move-left'
+          'move-left',
+          {
+            sum,
+            target,
+            relation: 'less',
+            action: 'sum 小于 0，左侧值偏小，left 右移以增大总和',
+            movedPointer: 'left',
+            previousPointers
+          }
         ));
       }
     }
@@ -256,7 +320,8 @@ export function generateSteps(nums: number[]): AlgorithmStep[] {
     })),
     result.slice(),
     { i: -1, left: -1, right: -1 },
-    'complete'
+    'complete',
+    { action: `扫描结束，共找到 ${result.length} 组不重复三元组` }
   ));
 
   return steps;
@@ -270,9 +335,10 @@ function createStep(
   arrayState: ArrayElementState[],
   result: number[][],
   pointers: PointerState,
-  animationType: AlgorithmStep['animationType']
+  animationType: AlgorithmStep['animationType'],
+  decision?: StepDecision
 ): AlgorithmStep {
-  return { id, description, codeLines, variables, arrayState, result, pointers, animationType };
+  return { id, description, codeLines, variables, arrayState, result, pointers, animationType, decision };
 }
 
 function createArrayState(
@@ -284,10 +350,15 @@ function createArrayState(
 ): ArrayElementState[] {
   return indexedNums.map((item, idx) => {
     let highlight: ArrayElementState['highlight'] = 'none';
-    if (idx === i) highlight = specialHighlight === 'skip' && idx === i ? 'skip' : 'i';
-    else if (idx === left) highlight = specialHighlight === 'found' ? 'found' : 'left';
-    else if (idx === right) highlight = specialHighlight === 'found' ? 'found' : 'right';
-    else if (specialHighlight === 'found' && idx === i) highlight = 'found';
+    if (specialHighlight === 'found' && (idx === i || idx === left || idx === right)) {
+      highlight = 'found';
+    } else if (idx === i) {
+      highlight = specialHighlight === 'skip' ? 'skip' : 'i';
+    } else if (idx === left) {
+      highlight = specialHighlight === 'skip' ? 'skip' : 'left';
+    } else if (idx === right) {
+      highlight = specialHighlight === 'skip' ? 'skip' : 'right';
+    }
     
     return {
       index: idx,
@@ -296,6 +367,11 @@ function createArrayState(
       highlight
     };
   });
+}
+
+function getRelation(sum: number): StepDecision['relation'] {
+  if (sum === 0) return 'equal';
+  return sum < 0 ? 'less' : 'greater';
 }
 
 // 验证输入数据

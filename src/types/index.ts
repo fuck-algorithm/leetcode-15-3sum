@@ -19,6 +19,18 @@ export interface AlgorithmStep {
   pointers: PointerState;
   // 动画类型
   animationType: 'init' | 'sort' | 'move-i' | 'move-left' | 'move-right' | 'found' | 'skip' | 'compare' | 'complete';
+  // 当前步骤的可视化决策信息
+  decision?: StepDecision;
+}
+
+export interface StepDecision {
+  sum?: number;
+  target?: number;
+  relation?: 'less' | 'equal' | 'greater';
+  action: string;
+  movedPointer?: 'i' | 'left' | 'right' | 'both';
+  previousPointers?: PointerState;
+  triplet?: number[];
 }
 
 export interface VariableState {

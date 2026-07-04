@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { Header } from './components/Header';
 import { DataInput } from './components/DataInput';
 import { CodePanel } from './components/CodePanel';
@@ -13,32 +13,24 @@ import './App.css';
 
 function App() {
   const [nums, setNums] = useState<number[]>(EXAMPLE_DATA[0].value);
-  const [steps, setSteps] = useState<AlgorithmStep[]>([]);
   const [currentStep, setCurrentStep] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [speed, setSpeed] = useState(1);
   const [showAlgorithmIdea, setShowAlgorithmIdea] = useState(false);
   
   const playIntervalRef = useRef<number | null>(null);
-
-  // 生成步骤
-  useEffect(() => {
-    const newSteps = generateSteps(nums);
-    setSteps(newSteps);
-    setCurrentStep(0);
-    setIsPlaying(false);
-  }, [nums]);
+  const steps: AlgorithmStep[] = useMemo(() => generateSteps(nums), [nums]);
 
   // 播放控制
   useEffect(() => {
     if (isPlaying && currentStep < steps.length - 1) {
       playIntervalRef.current = window.setInterval(() => {
         setCurrentStep(prev => {
-          if (prev >= steps.length - 1) {
+          const nextStep = Math.min(prev + 1, steps.length - 1);
+          if (nextStep >= steps.length - 1) {
             setIsPlaying(false);
-            return prev;
           }
-          return prev + 1;
+          return nextStep;
         });
       }, 1000 / speed);
     }
@@ -49,13 +41,6 @@ function App() {
       }
     };
   }, [isPlaying, speed, steps.length, currentStep]);
-
-  // 停止播放当到达末尾
-  useEffect(() => {
-    if (currentStep >= steps.length - 1) {
-      setIsPlaying(false);
-    }
-  }, [currentStep, steps.length]);
 
   const handlePrevious = useCallback(() => {
     setCurrentStep(prev => Math.max(0, prev - 1));
@@ -89,6 +74,8 @@ function App() {
 
   const handleDataChange = useCallback((newNums: number[]) => {
     setNums(newNums);
+    setCurrentStep(0);
+    setIsPlaying(false);
   }, []);
 
   return (
