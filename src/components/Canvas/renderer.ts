@@ -33,8 +33,8 @@ export function renderCanvas(
   const scene = layers.containers.selectAll<SVGGElement, string>('.canvas-scene').data(['scene']).join('g').attr('class', 'canvas-scene');
   scene.attr('transform', arrayState.length > 80 ? 'translate(0,140)' : 'translate(0,0)');
   const sceneLayers = ensureLayers(scene);
-  drawGrid(sceneLayers.containers, layout);
-  drawStage(layers.labels, layout, description, currentStep);
+  drawGrid(sceneLayers.containers, layout, dimensions.width);
+  drawStage(layers.labels, layout, description, currentStep, dimensions.width);
 
   const arrayGroup = sceneLayers.nodes.selectAll<SVGGElement, string>('.array-group').data(['array']).join('g').attr('class', 'array-group');
   arrayGroup.selectAll<SVGTextElement, string>('.array-title').data(['title']).join('text')
@@ -78,8 +78,8 @@ function ensureLayers(g: CanvasGroupSelection) {
   };
 }
 
-function drawGrid(g: CanvasGroupSelection, layout: CanvasLayout) {
-  const width = layout.contentWidth + 88;
+function drawGrid(g: CanvasGroupSelection, layout: CanvasLayout, viewportWidth: number) {
+  const width = Math.max(viewportWidth, layout.contentStartX + layout.contentWidth + 24);
   const height = layout.contentHeight;
   const vertical = d3.range(0, width + 1, 24).map(value => ({ id: `x-${value}`, value }));
   const horizontal = d3.range(0, height + 1, 24).map(value => ({ id: `y-${value}`, value }));
@@ -98,7 +98,7 @@ function drawMetrics(g: CanvasGroupSelection, layout: CanvasLayout, step: Algori
     { id: 'answers', label: '解', value: String(step.result.length) }
   ];
   const row = g.selectAll<SVGGElement, string>('.canvas-metrics').data(['metrics']).join('g').attr('class', 'canvas-metrics').attr('aria-label', '画布指标')
-    .attr('transform', `translate(${layout.startX},${layout.contentHeight - 28})`);
+    .attr('transform', `translate(${layout.contentStartX},${layout.contentHeight - 28})`);
   row.selectAll<SVGGElement, typeof metrics[number]>('.canvas-metric').data(metrics, metric => metric.id).join('g')
     .attr('class', 'canvas-metric')
     .attr('transform', (_, index) => `translate(${index * 104},0)` )
@@ -115,7 +115,8 @@ function drawStage(
   g: CanvasGroupSelection,
   layout: CanvasLayout,
   description: string,
-  step: AlgorithmStep
+  step: AlgorithmStep,
+  viewportWidth: number
 ) {
   const panel = g.selectAll<SVGGElement, string>('.stage-panel').data(['stage']).join('g')
     .attr('class', `stage-panel ${step.animationType}`)
@@ -123,15 +124,15 @@ function drawStage(
     .attr('data-step-id', step.id);
   panel.interrupt().attr('opacity', 1).attr('transform', 'translate(0,0)');
   panel.selectAll<SVGRectElement, string>('rect.stage-panel-bg').data(['background']).join('rect')
-    .attr('x', layout.startX)
+    .attr('x', layout.contentStartX)
     .attr('y', layout.stageY)
-    .attr('width', layout.contentWidth)
+    .attr('width', Math.min(layout.contentWidth, viewportWidth - layout.contentStartX - 24))
     .attr('height', 104)
     .attr('rx', 8)
     .attr('class', 'stage-panel-bg');
 
   panel.selectAll<SVGRectElement, string>('rect.stage-accent').data(['accent']).join('rect')
-    .attr('x', layout.startX)
+    .attr('x', layout.contentStartX)
     .attr('y', layout.stageY)
     .attr('width', 5)
     .attr('height', 104)
@@ -139,24 +140,24 @@ function drawStage(
     .attr('class', `stage-accent ${step.decision?.relation ?? step.animationType}`);
 
   panel.selectAll<SVGTextElement, string>('text.stage-kicker').data(['title']).join('text')
-    .attr('x', layout.startX + 18).attr('y', layout.stageY + 28).attr('class', 'stage-kicker').text(STAGE_TITLES[step.animationType]);
+    .attr('x', layout.contentStartX + 18).attr('y', layout.stageY + 28).attr('class', 'stage-kicker').text(STAGE_TITLES[step.animationType]);
   panel.selectAll<SVGTextElement, string>('text.operation-badge').data(['operation']).join('text')
-    .attr('x', layout.startX + 18).attr('y', layout.stageY + 48).attr('class', 'operation-badge').text(step.operation);
+    .attr('x', layout.contentStartX + 18).attr('y', layout.stageY + 48).attr('class', 'operation-badge').text(step.operation);
 
   const relation = step.decision?.relation;
   panel.selectAll<SVGTextElement, NonNullable<typeof relation>>('text.relation-badge')
     .data(relation ? [relation] : []).join('text')
-    .attr('x', layout.startX + 18).attr('y', layout.stageY + 68)
+    .attr('x', layout.contentStartX + 18).attr('y', layout.stageY + 68)
     .attr('class', value => `relation-badge ${value}`).text(value => getRelationText(value));
 
   const narration = step.narration || description;
-  const wrappedNarration = appendWrappedText(panel, narration, layout.startX + 118, layout.stageY + 30,
+  const wrappedNarration = appendWrappedText(panel, narration, layout.contentStartX + 118, layout.stageY + 30,
     Math.min(560, layout.contentWidth - 454), 18, 'step-description');
   wrappedNarration.selectAll<SVGTSpanElement, string>('tspan').attr('dy', (_, index) => index === 0 ? 0 : 28);
   if (Number(wrappedNarration.attr('data-line-count')) > 1) panel.select('text.stage-kicker').attr('y', layout.stageY + 24);
 
   panel.selectAll<SVGTextElement, string>('text.data-flow-guide').data(['guide']).join('text')
-    .attr('x', layout.startX + 118).attr('y', layout.stageY + 72).attr('class', 'data-flow-guide')
+    .attr('x', layout.contentStartX + 118).attr('y', layout.stageY + 72).attr('class', 'data-flow-guide')
     .text('数据流：原数组 → 排序 → 固定 i → 比较 left + right → 移动指针');
 }
 
@@ -433,18 +434,21 @@ function drawDecisionPanel(
   step: AlgorithmStep,
   pointers: PointerState
 ) {
+  const panelWidth = Math.min(410, layout.contentWidth - 24 - 322);
+  const panelGroupWidth = panelWidth + 24 + 322;
+  const panelX = layout.contentStartX + (layout.contentWidth - panelGroupWidth) / 2;
   const panel = g.selectAll<SVGGElement, string>('.decision-panel').data(['decision']).join('g')
     .attr('class', 'info-panel decision-panel').attr('opacity', 1);
   panel.selectAll('rect.info-panel-bg').data(['background']).join('rect')
-    .attr('x', layout.startX)
+    .attr('x', panelX)
     .attr('y', layout.detailY)
-    .attr('width', Math.min(410, layout.contentWidth * 0.54))
+    .attr('width', panelWidth)
     .attr('height', 108)
     .attr('rx', 8)
     .attr('class', 'info-panel-bg');
 
   panel.selectAll<SVGTextElement, string>('text.section-title').data(['title']).join('text')
-    .attr('x', layout.startX + 14).attr('y', layout.detailY + 24).attr('class', 'section-title').text('当前三数之和');
+    .attr('x', panelX + 14).attr('y', layout.detailY + 24).attr('class', 'section-title').text('当前三数之和');
 
   const values = getPointerValues(step, pointers);
   const sum = step.decision?.sum ?? values.sum;
@@ -453,18 +457,18 @@ function drawDecisionPanel(
     : '等待进入双指针扫描';
 
   panel.selectAll<SVGTextElement, string>('text.formula-text').data([formulaText]).join('text')
-    .attr('x', layout.startX + 14).attr('y', layout.detailY + 52).attr('class', 'formula-text').text(value => value);
+    .attr('x', panelX + 14).attr('y', layout.detailY + 52).attr('class', 'formula-text').text(value => value);
 
   const target = step.decision?.target;
   panel.selectAll<SVGTextElement, number>('text.target-text').data(target === undefined ? [] : [target]).join('text')
-    .attr('x', layout.startX + 14).attr('y', layout.detailY + 78).attr('class', 'target-text')
+    .attr('x', panelX + 14).attr('y', layout.detailY + 78).attr('class', 'target-text')
     .text(value => `目标：left + right = ${value}`);
   panel.selectAll<SVGTextElement, string>('text.decision-explanation').data([step.narration || step.description]).join('text')
-    .attr('x', layout.startX + 14).attr('y', layout.detailY + 98).attr('class', 'decision-explanation')
+    .attr('x', panelX + 14).attr('y', layout.detailY + 98).attr('class', 'decision-explanation')
     .text(value => value);
   const relation = step.decision?.relation;
   panel.selectAll<SVGTextElement, NonNullable<typeof relation>>('text.relation-pill').data(relation ? [relation] : []).join('text')
-    .attr('x', layout.startX + 308).attr('y', layout.detailY + 53)
+    .attr('x', panelX + panelWidth - 84).attr('y', layout.detailY + 53)
     .attr('class', value => `relation-pill ${value}`).text(value => getRelationText(value));
 }
 
@@ -473,7 +477,11 @@ function drawVariables(
   layout: CanvasLayout,
   variables: AlgorithmStep['variables']
 ) {
-  const x = layout.startX + Math.min(438, layout.contentWidth * 0.56);
+  const panelWidth = 322;
+  const panelGap = 24;
+  const decisionWidth = Math.min(410, layout.contentWidth - panelGap - panelWidth);
+  const groupWidth = decisionWidth + panelGap + panelWidth;
+  const x = layout.contentStartX + (layout.contentWidth - groupWidth) / 2 + decisionWidth + panelGap;
   const panel = g.selectAll<SVGGElement, string>('.vars-panel').data(['variables']).join('g')
     .attr('class', 'info-panel vars-panel').attr('opacity', 1);
   panel.selectAll<SVGRectElement, string>('rect.info-panel-bg').data(['background']).join('rect')
@@ -496,14 +504,14 @@ function drawResults(
 ) {
   const panel = g.selectAll<SVGGElement, string>('.result-group').data(['results']).join('g').attr('class', 'result-group');
   panel.selectAll<SVGTextElement, string>('text.result-title').data(['title']).join('text')
-    .attr('x', layout.startX)
+    .attr('x', layout.contentStartX)
     .attr('y', layout.resultY)
     .attr('class', 'section-title result-title')
     .text(`已找到三元组：${result.length} 组`);
 
   if (result.length === 0) {
     panel.selectAll<SVGTextElement, string>('text.empty-result').data(['empty']).join('text')
-      .attr('x', layout.startX).attr('y', layout.resultY + 30).attr('class', 'empty-result')
+      .attr('x', layout.contentStartX).attr('y', layout.resultY + 30).attr('class', 'empty-result')
       .text('暂无命中，继续移动指针搜索');
     panel.selectAll('.triplet-chip').remove();
     return;
@@ -519,7 +527,7 @@ function drawResults(
   ).each(function updateTriplet(triplet, idx) {
     const col = idx % columns;
     const row = Math.floor(idx / columns);
-    const tripletX = layout.startX + col * (tripletWidth + 14);
+    const tripletX = layout.contentStartX + col * (tripletWidth + 14);
     const tripletY = layout.resultY + 20 + row * 36;
     const group = d3.select(this).attr('opacity', 1);
     group.selectAll<SVGRectElement, string>('rect').data(['card']).join('rect')

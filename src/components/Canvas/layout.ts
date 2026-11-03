@@ -6,9 +6,17 @@ export function createCanvasLayout(step: AlgorithmStep, dimensions: CanvasDimens
   const cellWidth = getCellWidth(step.arrayState.length, dimensions.width);
   const cellHeight = 56;
   const arrayWidth = step.arrayState.length * cellWidth + Math.max(0, step.arrayState.length - 1) * gap;
-  const contentWidth = Math.max(760, arrayWidth + 96, dimensions.width - 96);
+  const panelGroupWidth = 410 + 24 + 322;
+  const contentWidth = Math.max(760, arrayWidth + 96, panelGroupWidth + 48);
   const startX = 48;
-  const arrayStartX = Math.max(startX, Math.round((dimensions.width - arrayWidth) / 2));
+  const arrayOverflows = arrayWidth + 96 >= dimensions.width - 96;
+  const contentGroupWidth = Math.min(contentWidth, Math.max(760, arrayWidth + 96, panelGroupWidth + 48));
+  const contentStartX = arrayOverflows
+    ? startX
+    : Math.max(startX, Math.round((dimensions.width - contentGroupWidth) / 2));
+  const arrayStartX = arrayOverflows
+    ? startX
+    : contentStartX + Math.round((contentGroupWidth - arrayWidth) / 2);
   const stageY = 24;
   const arrayY = Math.max(208, Math.round(dimensions.height * 0.38));
   const detailY = arrayY + cellHeight + 148;
@@ -17,7 +25,7 @@ export function createCanvasLayout(step: AlgorithmStep, dimensions: CanvasDimens
   const resultRows = Math.ceil(step.result.length / resultColumns);
   const contentHeight = Math.max(dimensions.height - 32, resultY + Math.max(96, resultRows * 40 + 40));
 
-  return { gap, cellWidth, cellHeight, startX, arrayStartX, stageY, arrayY, arrayWidth, contentWidth, detailY, resultY, contentHeight, resultColumns };
+  return { gap, cellWidth, cellHeight, startX, contentStartX, arrayStartX, stageY, arrayY, arrayWidth, contentWidth, detailY, resultY, contentHeight, resultColumns };
 }
 
 function getCellWidth(length: number, viewportWidth: number): number {

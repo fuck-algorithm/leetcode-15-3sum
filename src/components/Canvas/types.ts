@@ -16,6 +16,7 @@ export interface CanvasLayout {
   cellWidth: number;
   cellHeight: number;
   startX: number;
+  contentStartX: number;
   arrayStartX: number;
   stageY: number;
   arrayY: number;

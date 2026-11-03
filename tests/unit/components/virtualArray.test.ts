@@ -21,12 +21,17 @@ describe('virtual array window', () => {
     expect(layout.cellWidth).toBeGreaterThanOrEqual(44);
     expect(layout.cellWidth + layout.gap).toBeGreaterThanOrEqual(56);
     expect(layout.arrayStartX + layout.arrayWidth / 2).toBe(460);
+    expect(layout.contentStartX + layout.contentWidth / 2).toBe(460);
+    const panelGroupWidth = 410 + 24 + 322;
+    const panelGroupStart = layout.contentStartX + (layout.contentWidth - panelGroupWidth) / 2;
+    expect(panelGroupStart + panelGroupWidth / 2).toBe(460);
   });
 
   it('keeps long virtual arrays anchored to the scrollable canvas origin', () => {
     const step = generateSteps(Array.from({ length: 100 }, (_, index) => index - 50))[0];
     const layout = createCanvasLayout(step, { width: 920, height: 520 });
     expect(layout.arrayStartX).toBe(layout.startX);
+    expect(layout.contentStartX).toBe(layout.startX);
     expect(layout.arrayWidth).toBeGreaterThan(920);
   });
 

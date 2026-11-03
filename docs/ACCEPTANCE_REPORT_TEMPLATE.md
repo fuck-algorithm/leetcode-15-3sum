@@ -3,7 +3,7 @@
 - 题目：LeetCode 15. 三数之和
 - 仓库：git@github.com:fuck-algorithm/leetcode-15-3sum
 - 日期：2026-11-04
-- 阶段：M3（数据流箭头/徽标与布局碰撞优化；等待本轮 Pages 部署）
+- 阶段：M3（整体教学内容居中、数据流箭头/徽标与布局碰撞优化；等待本轮 Pages 部署）
 
 ## B1–B7
 
@@ -27,14 +27,14 @@
 - GitHub Pages 首页：HTTP 200，`text/html`
 - 状态栏：`server-url.txt` 输出包含 GitHub Pages 超链接；文件已被 `.gitignore` 忽略
 - `npm run test:unit`：PASS（12 tests）
-- `npm run test:coverage`：PASS，lines 87.95%、functions 89.58%、branches 79.00%
+- `npm run test:coverage`：PASS，lines 88.12%、functions 89.58%、branches 79.25%
 - `npm run test:e2e`：PASS（21/21，含题目描述与算法思路分离弹窗、画布代码抽屉、随机跳转、3 档视口及 3000 元素虚拟数组滑动验收）
 - 桌面画布面积/视口（代码抽屉默认收起）：1366×768 为 82.59%，1920×1080 为 87.60%；画布宽度分别占 99.4%、99.6%。代码按需覆盖为抽屉，打开后画布几何边界不缩小。E2E-017 验证抽屉显示时画布边界不缩小。
 - 3000 元素实测：每帧保留至多 96 个数组节点；鼠标平移按单次约 600 SVG px 增量移动，全局位置滑块可直接到末端；步骤快照限制在 40 帧内
 - `git diff --check`：PASS
-- 验收 Rubric 暂评：84/100（分镜、信息密度提升后 4/5；其余按上一轮记录，远程 Actions 尚未由本次改动触发）
-- GitHub Actions run `41675540552`：PASS；build、quality gates、Pages artifact 与 deploy 全部成功；Pages 首页 HTTP 200 且加载本次构建资源。
-- 本轮 Round 4：compare 帧三条带箭头数据流、徽标均可见；样例及 3000 项窗口的数组节点无重叠。
+- 验收 Rubric 暂评：84/100（分镜、信息密度提升后 4/5；本地质量门禁通过，部署见本轮 Actions）
+- 上轮 GitHub Actions run `41675540552`：PASS；build、quality gates、Pages artifact 与 deploy 全部成功。
+- 本轮 Round 4：compare 帧三条带箭头数据流、徽标均可见；样例及 3000 项窗口的数组节点无重叠。整体面板组实测中心 x=683px，与 1366×768 画布中心一致。
 
 ## 本轮视觉改进（Round 4）
 
@@ -59,7 +59,7 @@
 
 - 截图与视频保存在本地忽略目录 `artifacts/`，未提交二进制证据；自动化 CI 与 Pages 部署已实跑成功。
 - renderer 仍超过 250 行，后续可按语义层拆分，不影响本轮教学可读性与质量门禁。
-- 箭头与防碰撞改动已通过本地质量门禁，推送 main 并等待本轮 Pages workflow 后复核线上画面。
+- 整体居中与数据流箭头改动已通过本地质量门禁，推送 main 并等待本轮 Pages workflow 后复核线上画面。
 
 ## 暂定 Rubric（0–5）
 
