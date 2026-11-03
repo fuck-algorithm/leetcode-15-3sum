@@ -82,7 +82,8 @@
 
 .speed-control {
   position: relative;
-  margin-left: auto;
+  margin-left: 0;
+  z-index: 12;
 }
 
 .speed-btn {
@@ -102,8 +103,8 @@
 .speed-menu {
   position: absolute;
   bottom: 100%;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 0;
+  transform: none;
   margin-bottom: 4px;
   background: var(--card-bg);
   border: 1px solid var(--border-color);
@@ -200,5 +201,4 @@
     white-space: nowrap;
   }
 }
-.speed-control { z-index: 12; }
 .speed-menu { top: auto; bottom: 100%; margin-top: 0; margin-bottom: 4px; }
