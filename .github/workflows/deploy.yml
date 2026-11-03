@@ -31,6 +31,9 @@ jobs:
         run: |
           if [ -f package-lock.json ]; then npm ci; else npm install; fi
 
+      - name: Install Playwright Chromium
+        run: npm run test:e2e:install
+
       - name: Quality gates
         run: |
           npm run qa:guard
