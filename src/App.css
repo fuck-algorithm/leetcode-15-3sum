@@ -83,7 +83,7 @@
   position: absolute;
   z-index: 3;
   top: 8px;
-  right: 150px;
+  right: 170px;
   min-height: 34px;
   padding: 0 10px;
   color: #245642;
@@ -108,7 +108,7 @@
     transform: translateY(calc(100% + 12px));
   }
   .has-code-drawer .code-drawer { transform: translateY(0); }
-  .canvas-code-toggle { right: 144px; top: 8px; }
+  .canvas-code-toggle { right: 164px; top: 8px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

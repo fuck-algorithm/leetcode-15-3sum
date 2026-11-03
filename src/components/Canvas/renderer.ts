@@ -38,7 +38,10 @@ export function renderCanvas(
 
   const arrayGroup = sceneLayers.nodes.selectAll<SVGGElement, string>('.array-group').data(['array']).join('g').attr('class', 'array-group');
   arrayGroup.selectAll<SVGTextElement, string>('.array-title').data(['title']).join('text')
-    .attr('x', layout.startX).attr('y', layout.arrayY - 34).attr('class', 'section-title array-title').text('数组状态与双指针窗口');
+    .attr('x', layout.startX).attr('y', layout.arrayY - 82).attr('class', 'section-title array-title').text('排序后的数组');
+  arrayGroup.selectAll<SVGTextElement, string>('.array-subtitle').data(['subtitle']).join('text')
+    .attr('x', layout.startX).attr('y', layout.arrayY - 64).attr('class', 'array-subtitle')
+    .text('格子下方是排序下标；“原”标记保留输入位置');
 
   drawSearchWindow(arrayGroup, pointers, layout);
   drawDecisionConnectors(sceneLayers.edges, pointers, layout);
@@ -151,6 +154,10 @@ function drawStage(
     Math.min(560, layout.contentWidth - 454), 18, 'step-description');
   wrappedNarration.selectAll<SVGTSpanElement, string>('tspan').attr('dy', (_, index) => index === 0 ? 0 : 28);
   if (Number(wrappedNarration.attr('data-line-count')) > 1) panel.select('text.stage-kicker').attr('y', layout.stageY + 24);
+
+  panel.selectAll<SVGTextElement, string>('text.data-flow-guide').data(['guide']).join('text')
+    .attr('x', layout.startX + 118).attr('y', layout.stageY + 72).attr('class', 'data-flow-guide')
+    .text('数据流：原数组 → 排序 → 固定 i → 比较 left + right → 移动指针');
 }
 
 function drawSearchWindow(g: CanvasGroupSelection, pointers: PointerState, layout: CanvasLayout) {
@@ -191,7 +198,7 @@ function drawDecisionConnectors(g: CanvasGroupSelection, pointers: PointerState,
 
   const points = [pointers.i, pointers.left, pointers.right]
     .map(index => layout.startX + index * (layout.cellWidth + layout.gap) + layout.cellWidth / 2);
-  const y = layout.arrayY + layout.cellHeight + 42;
+  const y = layout.arrayY + layout.cellHeight + 34;
 
   g.selectAll<SVGPathElement, string>('.sum-connector').data(['sum']).join('path')
     .attr('class', 'sum-connector')
@@ -200,9 +207,9 @@ function drawDecisionConnectors(g: CanvasGroupSelection, pointers: PointerState,
 
   g.selectAll<SVGTextElement, string>('.sum-connector-label').data(['label']).join('text')
     .attr('x', (points[0] + points[2]) / 2)
-    .attr('y', y + 30)
+    .attr('y', y + 18)
     .attr('class', 'sum-connector-label')
-    .text('参与本次求和');
+    .text('固定值 + left + right');
 }
 
 function getNodeStatus(item: AlgorithmStep['arrayState'][number], step: AlgorithmStep) {
@@ -412,12 +419,12 @@ function drawDecisionPanel(
     .attr('x', layout.startX)
     .attr('y', layout.detailY)
     .attr('width', Math.min(410, layout.contentWidth * 0.54))
-    .attr('height', 92)
+    .attr('height', 108)
     .attr('rx', 8)
     .attr('class', 'info-panel-bg');
 
   panel.selectAll<SVGTextElement, string>('text.section-title').data(['title']).join('text')
-    .attr('x', layout.startX + 14).attr('y', layout.detailY + 24).attr('class', 'section-title').text('本步判断');
+    .attr('x', layout.startX + 14).attr('y', layout.detailY + 24).attr('class', 'section-title').text('当前三数之和');
 
   const values = getPointerValues(step, pointers);
   const sum = step.decision?.sum ?? values.sum;
@@ -430,8 +437,11 @@ function drawDecisionPanel(
 
   const target = step.decision?.target;
   panel.selectAll<SVGTextElement, number>('text.target-text').data(target === undefined ? [] : [target]).join('text')
-    .attr('x', layout.startX + 14).attr('y', layout.detailY + 76).attr('class', 'target-text')
+    .attr('x', layout.startX + 14).attr('y', layout.detailY + 78).attr('class', 'target-text')
     .text(value => `目标：left + right = ${value}`);
+  panel.selectAll<SVGTextElement, string>('text.decision-explanation').data([step.narration || step.description]).join('text')
+    .attr('x', layout.startX + 14).attr('y', layout.detailY + 98).attr('class', 'decision-explanation')
+    .text(value => value);
   const relation = step.decision?.relation;
   panel.selectAll<SVGTextElement, NonNullable<typeof relation>>('text.relation-pill').data(relation ? [relation] : []).join('text')
     .attr('x', layout.startX + 308).attr('y', layout.detailY + 53)
@@ -447,7 +457,7 @@ function drawVariables(
   const panel = g.selectAll<SVGGElement, string>('.vars-panel').data(['variables']).join('g')
     .attr('class', 'info-panel vars-panel').attr('opacity', 1);
   panel.selectAll<SVGRectElement, string>('rect.info-panel-bg').data(['background']).join('rect')
-    .attr('x', x).attr('y', layout.detailY).attr('width', 322).attr('height', 92).attr('rx', 8).attr('class', 'info-panel-bg');
+    .attr('x', x).attr('y', layout.detailY).attr('width', 322).attr('height', 108).attr('rx', 8).attr('class', 'info-panel-bg');
   panel.selectAll<SVGTextElement, string>('text.section-title').data(['title']).join('text')
     .attr('x', x + 14).attr('y', layout.detailY + 24).attr('class', 'section-title').text('变量状态');
 

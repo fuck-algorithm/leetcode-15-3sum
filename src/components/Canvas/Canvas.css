@@ -83,8 +83,10 @@
 .move-origin { opacity: .28; }
 .skip-marker line { stroke: var(--highlight-skip); stroke-width: 2; stroke-linecap: round; opacity: .75; }
 .section-title { fill: var(--text-secondary); font-size: 12px; font-weight: 600; }
+.array-subtitle { fill: var(--text-secondary); font-size: 10px; }
 .formula-text { fill: var(--text-primary); font-size: 18px; font-weight: 700; }
 .target-text { fill: var(--text-secondary); font-size: 12px; }
+.decision-explanation { fill: var(--text-secondary); font-size: 10px; }
 .var-text { fill: var(--text-primary); font-family: monospace; font-size: 12px; }
 .var-text.highlight { fill: var(--success-color); font-weight: 700; }
 .empty-result { fill: var(--text-secondary); font-size: 12px; }
@@ -92,6 +94,9 @@
 .triplet-bg.latest { fill: #dcfce7; stroke: rgba(5,150,105,.62); }
 .triplet-text { fill: #047857; font-size: 12px; font-weight: 600; text-anchor: middle; }
 .step-description { fill: var(--text-primary); font-size: 12px; font-weight: 600; }
+.data-flow-guide { fill: var(--text-secondary); font-size: 10px; }
+.decision-panel .info-panel-bg { fill: #f8fafc; }
+.vars-panel .info-panel-bg { fill: #f0f7f4; }
 .stage-kicker { font-size: 12px; }
 .operation-badge { font-size: 9px; }
 @media (max-width: 760px) {

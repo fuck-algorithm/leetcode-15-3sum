@@ -1,9 +1,9 @@
-# 验收报告（Round 1）
+# 验收报告（Round 2）
 
 - 题目：LeetCode 15. 三数之和
 - 仓库：git@github.com:fuck-algorithm/leetcode-15-3sum
-- 日期：2026-11-03
-- 阶段：M2（核心交互/渲染已有；M4 人工动效证据和 Rubric 未完成）
+- 日期：2026-11-04
+- 阶段：M3（数组防重叠与数据流教学层优化；自动化与视觉证据更新）
 
 ## B1–B7
 
@@ -19,22 +19,34 @@
 
 ## 自动化验收结果
 
+- `npm run qa:full`：PASS（包含 lint、type-check、build、test:coverage、21/21 test:e2e）
 - `npm run qa:guard`：PASS
 - `npm run lint`：PASS
 - `npm run type-check`：PASS
 - `npm run build`：PASS（Vite 7.3.0，636 modules）
 - GitHub Pages 首页：HTTP 200，`text/html`
 - 状态栏：`server-url.txt` 输出包含 GitHub Pages 超链接；文件已被 `.gitignore` 忽略
-- `npm run test:unit`：PASS（10 tests）
-- `npm run test:coverage`：PASS，lines 89.39%、functions 91.48%、branches 79.11%
-- `npm run test:e2e -- --workers=4`：PASS（21/21，含题目描述与算法思路分离弹窗、画布代码抽屉、随机跳转、3 档视口及 3000 元素虚拟数组滑动验收）
+- `npm run test:unit`：PASS（11 tests）
+- `npm run test:coverage`：PASS，lines 89.45%、functions 91.48%、branches 78.94%
+- `npm run test:e2e`：PASS（21/21，含题目描述与算法思路分离弹窗、画布代码抽屉、随机跳转、3 档视口及 3000 元素虚拟数组滑动验收）
 - 桌面画布面积/视口（代码抽屉默认收起）：1366×768 为 82.59%，1920×1080 为 87.60%；画布宽度分别占 99.4%、99.6%。代码按需覆盖为抽屉，打开后画布几何边界不缩小。E2E-017 验证抽屉显示时画布边界不缩小。
 - 3000 元素实测：每帧保留至多 96 个数组节点；鼠标平移按单次约 600 SVG px 增量移动，全局位置滑块可直接到末端；步骤快照限制在 40 帧内
 - `git diff --check`：PASS
+- 验收 Rubric 暂评：84/100（分镜、信息密度提升后 4/5；其余按上一轮记录，远程 Actions 尚未由本次改动触发）
+- B1–B7：FAIL（自动化与 AC 通过；远程 CI 尚未验证，按统一口径不得给 PASS）
+
+## 本轮视觉改进（Round 2）
+
+- 数组格子最小宽度锁定为 44px、中心距至少 56px；长数组虚拟化仍保留可读尺寸，防止单元格挤成窄条。
+- 重排信息层级：上方说明算法数据流，中间数组显式说明排序下标和原始下标，下方分开展示求和决策、变量与结果。
+- 提升数组行与求和面板间距；求和面板展示本步解释，辅助线标注参与求和的角色。
+- Chromium 1366×768、1920×1080 截图及 1x/3x 播放录屏已更新到 `artifacts/`；样例 14 个步骤和 3000 项窗口均无数组节点包围盒重叠。
 
 ## 失败闭环记录
 
-1. E2E-001 首轮顶部栏总占比 27.7%；压缩 header/input/control 后复测通过。
+1. Round 2：原布局 `cellWidth` 可缩至 2px，导致数据值/下标不可读；设定最小格宽与步距后，单测和浏览器坐标检查通过。
+2. Round 2：步骤说明缺少整体算法流程，求和判断区解说缺乏视觉区隔；增加常驻流程线、明确数组副标题、决策面板文字与不同底色后通过视觉复核。
+3. E2E-001 首轮顶部栏总占比 27.7%；压缩 header/input/control 后复测通过。
 2. E2E-006 初始帧缺少当前焦点；增加初始化帧 current 状态后通过。
 3. E2E-010 dialog 语义缺失；补 role/aria-label 后通过。
 4. E2E-013 速度菜单受固定层覆盖；调整控件层级/菜单位置后单测与全量复测通过。
@@ -44,7 +56,7 @@
 
 - 已录制 1x 与 3x 完整播放视频；已保存 1366×768、1920×1080、相邻步骤及 reduced-motion 截图到被 git 忽略的 `artifacts/`。
 - E2E 已执行 10 次非顺序进度跳转并确认样例节点不重叠；3000 元素输入每帧限制到 96 个 DOM 节点，虚拟窗口随镜头移动，拖动和平移滑块均可查看末端。
-- 仍需人工完整播放复核指针轨迹、解说与画面同步，以及真实设备可读性；Pages 远程 CI workflow 尚未实跑。
+- 本轮已用 Chromium 在 1366×768、1920×1080 检查截图与 1x/3x 完整播放录屏；仍未实测 GitHub Actions 远程 Pages workflow。
 - 部分源码仍超过技能建议的 250 行，Canvas renderer 需后续按层拆分。
 - GitHub Actions 对完整 E2E 在 CI 的 Chromium 依赖安装和运行尚未实测。
 
