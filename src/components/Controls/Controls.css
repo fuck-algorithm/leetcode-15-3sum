@@ -201,4 +201,4 @@
   }
 }
 .speed-control { z-index: 12; }
-.speed-menu { bottom: auto; top: 100%; margin-top: 4px; margin-bottom: 0; }
+.speed-menu { top: auto; bottom: 100%; margin-top: 0; margin-bottom: 4px; }
