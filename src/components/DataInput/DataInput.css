@@ -1,14 +1,22 @@
 .data-input {
-  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 40px;
+  padding: 2px 12px;
   background: var(--card-bg);
   border-bottom: 1px solid var(--border-color);
   flex-shrink: 0;
 }
 
+.input-row { flex: 1; }
+.examples-row { flex: 0 0 auto; margin: 0; }
+
 .input-row {
   display: flex;
   align-items: center;
   gap: 8px;
+  min-width: 0;
 }
 
 .input-label {
@@ -99,4 +107,27 @@
 .example-btn.active {
   background: var(--primary-color);
   color: white;
+}
+
+@media (max-width: 760px) {
+  .data-input { min-height: 40px; padding: 2px 8px; }
+
+  .input-row,
+  .examples-row {
+    flex-wrap: nowrap;
+    overflow: hidden;
+  }
+  .examples-row { display: none; }
+
+  .input-field {
+    min-width: 0;
+    max-width: none;
+    flex-basis: 0;
+  }
+
+  .apply-btn,
+  .random-btn,
+  .example-btn {
+    white-space: nowrap;
+  }
 }

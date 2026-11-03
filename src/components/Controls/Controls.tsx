@@ -14,7 +14,7 @@ interface ControlsProps {
   onSpeedChange: (speed: number) => void;
 }
 
-const SPEED_OPTIONS = [0.5, 0.75, 1, 1.25, 1.5, 2];
+const SPEED_OPTIONS = [0.5, 0.75, 1, 1.25, 1.5, 2, 3];
 
 export function Controls({
   currentStep,
@@ -29,6 +29,7 @@ export function Controls({
 }: ControlsProps) {
   const [speed, setSpeed] = useState(1);
   const [showSpeedMenu, setShowSpeedMenu] = useState(false);
+  const [isDraggingProgress, setIsDraggingProgress] = useState(false);
 
   useEffect(() => {
     getPlaybackSpeed().then(savedSpeed => {
@@ -46,7 +47,7 @@ export function Controls({
 
   // 键盘快捷键
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
-    if (e.target instanceof HTMLInputElement) return;
+    if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement || (e.target instanceof HTMLElement && e.target.isContentEditable)) return;
     
     switch (e.key) {
       case 'ArrowLeft':
@@ -76,17 +77,21 @@ export function Controls({
 
   const progress = totalSteps > 1 ? (currentStep / (totalSteps - 1)) * 100 : 0;
 
-  const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const percentage = x / rect.width;
-    const step = Math.round(percentage * (totalSteps - 1));
-    onSeek(Math.max(0, Math.min(totalSteps - 1, step)));
+  const seekAt = (clientX: number, element: HTMLDivElement) => {
+    const rect = element.getBoundingClientRect();
+    if (rect.width <= 0) return;
+    const percentage = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+    onSeek(Math.round(percentage * (totalSteps - 1)));
   };
 
-  const handleProgressDrag = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.buttons !== 1) return;
-    handleProgressClick(e);
+  const handleProgressPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+    setIsDraggingProgress(true);
+    event.currentTarget.setPointerCapture(event.pointerId);
+    seekAt(event.clientX, event.currentTarget);
+  };
+
+  const handleProgressPointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (isDraggingProgress) seekAt(event.clientX, event.currentTarget);
   };
 
   return (
@@ -135,10 +140,25 @@ export function Controls({
         </div>
       </div>
 
-      <div 
+      <div
         className="progress-bar"
-        onClick={handleProgressClick}
-        onMouseMove={handleProgressDrag}
+        role="slider"
+        aria-label="演示进度"
+        aria-valuemin={1}
+        aria-valuemax={totalSteps}
+        aria-valuenow={currentStep + 1}
+        tabIndex={0}
+        onKeyDown={event => {
+          if (event.key === 'ArrowLeft') onSeek(Math.max(0, currentStep - 1));
+          if (event.key === 'ArrowRight') onSeek(Math.min(totalSteps - 1, currentStep + 1));
+          if (event.key === 'Home') onSeek(0);
+          if (event.key === 'End') onSeek(totalSteps - 1);
+        }}
+        onClick={event => { event.stopPropagation(); seekAt(event.clientX, event.currentTarget); }}
+        onPointerDown={event => { event.stopPropagation(); handleProgressPointerDown(event); }}
+        onPointerMove={handleProgressPointerMove}
+        onPointerUp={() => setIsDraggingProgress(false)}
+        onPointerCancel={() => setIsDraggingProgress(false)}
       >
         <div className="progress-track">
           <div 

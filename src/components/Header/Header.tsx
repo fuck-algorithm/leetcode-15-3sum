@@ -4,9 +4,10 @@ import './Header.css';
 
 interface HeaderProps {
   onShowAlgorithmIdea: () => void;
+  onShowProblem: () => void;
 }
 
-export function Header({ onShowAlgorithmIdea }: HeaderProps) {
+export function Header({ onShowAlgorithmIdea, onShowProblem }: HeaderProps) {
   const [stars, setStars] = useState<number>(0);
 
   useEffect(() => {
@@ -38,10 +39,13 @@ export function Header({ onShowAlgorithmIdea }: HeaderProps) {
       </div>
 
       <div className="header-right">
+        <button className="problem-book-btn" onClick={onShowProblem} aria-haspopup="dialog">
+          <span className="problem-book-icon" aria-hidden="true">▤</span>题目描述
+        </button>
         <button className="algorithm-idea-btn" onClick={onShowAlgorithmIdea}>
           💡 算法思路
         </button>
-        
+
         <a
           href={GITHUB_REPO_URL}
           target="_blank"

@@ -19,7 +19,7 @@ const PRISM_LANGUAGE_MAP: Record<ProgrammingLanguage, string> = {
 };
 
 export function CodePanel({ currentStep }: CodePanelProps) {
-  const [language, setLanguage] = useState<ProgrammingLanguage>('python');
+  const [language, setLanguage] = useState<ProgrammingLanguage>('java');
 
   useEffect(() => {
     getLanguage().then(setLanguage);
@@ -34,28 +34,9 @@ export function CodePanel({ currentStep }: CodePanelProps) {
   const highlightedLines = currentStep?.codeLines[language] || [];
   const variables = currentStep?.variables || [];
 
-  // 获取某行的变量值
   const getLineVariables = (lineNumber: number): VariableState[] => {
-    return variables.filter(v => {
-      // 简单映射：根据变量名和当前高亮行判断
-      const varLineMap: Record<string, number[]> = {
-        'nums': [3, 2, 3, 2],
-        'n': [4, 3, 4, 3],
-        'i': [8, 7, 8, 7],
-        'left': [14, 11, 14, 11],
-        'right': [15, 12, 15, 12],
-        'sum': [17, 14, 17, 14],
-        'target': [18, 14, 18, 14],
-        'triplet': [20, 16, 20, 16],
-        'result': [32, 27, 32, 27]
-      };
-      const langIndex = LANGUAGES.indexOf(language);
-      const varLines = varLineMap[v.name];
-      if (varLines && varLines[langIndex] === lineNumber) {
-        return true;
-      }
-      return false;
-    });
+    if (!highlightedLines.includes(lineNumber)) return [];
+    return variables.filter(variable => variable.highlight).slice(0, 3);
   };
 
   return (

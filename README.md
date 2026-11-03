@@ -1,16 +1,5 @@
-# 15. 三数之和 - 算法可视化
+# 15. 三数之和
 
-LeetCode 第15题「三数之和」的算法可视化演示。
+通过排序与双指针动画逐步演示三数之和。
 
-## 在线演示
-
-👉 [https://fuck-algorithm.github.io/leetcode-15-3sum/](https://fuck-algorithm.github.io/leetcode-15-3sum/)
-
-## 本地运行
-
-```bash
-npm install
-npm run dev
-```
-
-服务将在 http://localhost:42437 启动。
+[在线演示](https://fuck-algorithm.github.io/leetcode-15-3sum/)

@@ -19,6 +19,9 @@ export interface AlgorithmStep {
   pointers: PointerState;
   // 动画类型
   animationType: 'init' | 'sort' | 'move-i' | 'move-left' | 'move-right' | 'found' | 'skip' | 'compare' | 'complete';
+  operation: 'init' | 'read' | 'compare' | 'move' | 'match' | 'done';
+  narration: string;
+  anchorIds: string[];
   // 当前步骤的可视化决策信息
   decision?: StepDecision;
 }

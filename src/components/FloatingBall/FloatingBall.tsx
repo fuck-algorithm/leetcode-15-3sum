@@ -21,7 +21,7 @@ export function FloatingBall() {
         <div className="qr-popup">
           <div className="qr-content">
             <img 
-              src="./images/wechat-group.png" 
+              src={`${import.meta.env.BASE_URL}assets/qrcode-community.png`}
               alt="微信交流群" 
               className="qr-image"
             />

@@ -8,7 +8,8 @@ export function generateSteps(nums: number[]): AlgorithmStep[] {
 
   // 创建带原始索引的数组
   const indexedNums = nums.map((value, index) => ({ value, originalIndex: index }));
-  
+  if (n > 80) return generateBoundedSteps(indexedNums, nums);
+
   // 初始状态
   steps.push(createStep(
     stepId++,
@@ -75,6 +76,7 @@ export function generateSteps(nums: number[]): AlgorithmStep[] {
   for (let i = 0; i < n - 2; i++) {
     // 跳过重复元素
     if (i > 0 && sortedNums[i] === sortedNums[i - 1]) {
+      const previousPointers = { i: i - 1, left: -1, right: -1 };
       steps.push(createStep(
         stepId++,
         `i=${i}: nums[${i}]=${sortedNums[i]} 与前一个元素相同，跳过避免重复`,
@@ -88,7 +90,7 @@ export function generateSteps(nums: number[]): AlgorithmStep[] {
         result.slice(),
         { i, left: -1, right: -1 },
         'skip',
-        { action: '固定值重复，跳过以避免生成重复三元组', movedPointer: 'i' }
+        { action: '固定值重复，跳过以避免生成重复三元组', movedPointer: 'i', previousPointers }
       ));
       continue;
     }
@@ -327,6 +329,66 @@ export function generateSteps(nums: number[]): AlgorithmStep[] {
   return steps;
 }
 
+function generateBoundedSteps(indexedNums: { value: number; originalIndex: number }[], originalNums: number[]): AlgorithmStep[] {
+  const sorted = indexedNums.map(item => ({ ...item })).sort((a, b) => a.value - b.value);
+  const values = sorted.map(item => item.value);
+  const result: number[][] = [];
+  const steps: AlgorithmStep[] = [];
+  let id = 0;
+  const snapshot = (description: string, operation: AlgorithmStep['operation'], animationType: AlgorithmStep['animationType'], i: number, left: number, right: number, sum?: number): AlgorithmStep => {
+    const state = sorted.map((item, index) => ({
+      index,
+      value: item.value,
+      originalIndex: item.originalIndex,
+      highlight: sum === 0 && (index === i || index === left || index === right) ? 'found' as const
+        : animationType === 'compare' && (index === left || index === right) ? index === left ? 'left' as const : 'right' as const
+          : index === i ? 'i' as const : index === left ? 'left' as const : index === right ? 'right' as const : 'none' as const
+    }));
+    const step = createStep(
+      id++, description,
+      { java: [17, 18], python: [14], golang: [17, 18], javascript: [14] },
+      [
+        { name: 'i', value: i },
+        { name: 'left', value: left },
+        { name: 'right', value: right },
+        ...(sum === undefined ? [] : [{ name: 'sum', value: sum, highlight: true }])
+      ], state, result.map(triplet => [...triplet]), { i, left, right }, animationType,
+      { sum, target: i >= 0 ? -values[i] : undefined, relation: sum === undefined ? undefined : getRelation(sum), action: description }
+    );
+    step.operation = operation;
+    step.narration = description;
+    return step;
+  };
+
+  steps.push(snapshot(`对原始 ${originalNums.length} 个元素排序完成；完整数组可在画布中水平平移查看。`, 'init', 'init', -1, -1, -1));
+  for (let i = 0; i < values.length - 2 && steps.length < 40; i += 1) {
+    if (i > 0 && values[i] === values[i - 1]) {
+      steps.push(snapshot(`跳过重复固定值 ${values[i]}，避免产生相同三元组。`, 'move', 'skip', i, -1, -1));
+      continue;
+    }
+    if (values[i] > 0) break;
+    let left = i + 1;
+    let right = values.length - 1;
+    steps.push(snapshot(`固定 nums[${i}]=${values[i]}，从两端开始扫描剩余 ${right - left + 1} 个候选值。`, 'move', 'move-i', i, left, right));
+    while (left < right && steps.length < 38) {
+      const sum = values[i] + values[left] + values[right];
+      steps.push(snapshot(`比较 ${values[i]} + ${values[left]} + ${values[right]} = ${sum} 与目标 0。`, 'compare', 'compare', i, left, right, sum));
+      if (sum === 0) {
+        result.push([values[i], values[left], values[right]]);
+        steps.push(snapshot(`命中不重复三元组 [${values[i]}, ${values[left]}, ${values[right]}]，保存到结果集。`, 'match', 'found', i, left, right, sum));
+        left += 1;
+        right -= 1;
+      } else if (sum < 0) left += 1;
+      else right -= 1;
+    }
+  }
+  steps.push(snapshot(`扫描结束，在 ${values.length} 个元素中找到 ${result.length} 组不重复答案。`, 'done', 'complete', -1, -1, -1));
+  if (steps.length > 40) {
+    return [steps[0], ...steps.slice(1, 39), steps.at(-1)!].map((step, index) => ({ ...step, id: index, anchorIds: [`step-${index}`] }));
+  }
+  return steps;
+}
+
 function createStep(
   id: number,
   description: string,
@@ -338,7 +400,18 @@ function createStep(
   animationType: AlgorithmStep['animationType'],
   decision?: StepDecision
 ): AlgorithmStep {
-  return { id, description, codeLines, variables, arrayState, result, pointers, animationType, decision };
+  const operation: AlgorithmStep['operation'] = animationType === 'init' || animationType === 'sort'
+    ? animationType === 'init' ? 'init' : 'read'
+    : animationType === 'compare' ? 'compare'
+      : animationType === 'found' ? 'match'
+        : animationType === 'complete' ? 'done' : 'move';
+  const narration = animationType === 'compare' && decision?.relation
+    ? `比较 ${description.replace('计算三数之和: ', '')}，总和${decision.relation === 'less' ? '小于' : decision.relation === 'greater' ? '大于' : '等于'}目标 0，因此${decision.relation === 'less' ? '增大 left 指向的值' : decision.relation === 'greater' ? '减小 right 指向的值' : '记录这一组三元组'}。`
+    : decision?.action ?? description;
+  return {
+    id, description, codeLines, variables, arrayState, result, pointers, animationType, decision,
+    operation, narration, anchorIds: [`step-${id}`]
+  };
 }
 
 function createArrayState(

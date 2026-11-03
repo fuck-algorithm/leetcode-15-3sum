@@ -30,7 +30,7 @@ async function getDB(): Promise<IDBPDatabase<ThreeSumDB>> {
 }
 
 const DEFAULT_SETTINGS: UserSettings = {
-  language: 'python',
+  language: 'java',
   playbackSpeed: 1,
   githubStars: 0,
   githubStarsLastFetch: 0,

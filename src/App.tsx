@@ -6,6 +6,7 @@ import { Canvas } from './components/Canvas';
 import { Controls } from './components/Controls';
 import { Modal } from './components/Modal';
 import { AlgorithmIdea } from './components/Modal/AlgorithmIdea';
+import { ProblemModal } from './components/Modal/ProblemModal';
 import { FloatingBall } from './components/FloatingBall';
 import { generateSteps, EXAMPLE_DATA } from './algorithms/threeSum';
 import type { AlgorithmStep } from './types';
@@ -17,6 +18,8 @@ function App() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [speed, setSpeed] = useState(1);
   const [showAlgorithmIdea, setShowAlgorithmIdea] = useState(false);
+  const [showProblemDescription, setShowProblemDescription] = useState(false);
+  const [showCode, setShowCode] = useState(false);
   
   const playIntervalRef = useRef<number | null>(null);
   const steps: AlgorithmStep[] = useMemo(() => generateSteps(nums), [nums]);
@@ -80,16 +83,35 @@ function App() {
 
   return (
     <div className="app">
-      <Header onShowAlgorithmIdea={() => setShowAlgorithmIdea(true)} />
+      <Header
+        onShowAlgorithmIdea={() => setShowAlgorithmIdea(true)}
+        onShowProblem={() => setShowProblemDescription(true)}
+      />
       <DataInput onDataChange={handleDataChange} currentData={nums} />
       
-      <div className="main-content">
-        <div className="code-section">
-          <CodePanel currentStep={steps[currentStep] || null} />
-        </div>
+      <div className={`main-content ${showCode ? 'has-code-drawer' : ''}`}>
         <div className="canvas-section">
-          <Canvas currentStep={steps[currentStep] || null} />
+          <Canvas currentStep={steps[currentStep] || null} playbackSpeed={speed} />
+          <button
+            className="canvas-code-toggle"
+            type="button"
+            aria-label={showCode ? '隐藏代码' : '查看代码'}
+            aria-expanded={showCode}
+            aria-controls="algorithm-code-drawer"
+            onClick={() => setShowCode(open => !open)}
+          >
+            {showCode ? '隐藏代码' : '查看代码'}
+          </button>
         </div>
+        <aside id="algorithm-code-drawer" className="code-drawer" aria-hidden={!showCode} inert={!showCode}>
+          <div className="code-drawer-heading">
+            <strong>算法代码</strong>
+            <button type="button" aria-label="关闭代码面板" onClick={() => setShowCode(false)}>×</button>
+          </div>
+          <div className="code-drawer-body">
+            <CodePanel currentStep={steps[currentStep] || null} />
+          </div>
+        </aside>
       </div>
 
       <Controls
@@ -103,6 +125,8 @@ function App() {
         onSeek={handleSeek}
         onSpeedChange={handleSpeedChange}
       />
+
+      <ProblemModal isOpen={showProblemDescription} onClose={() => setShowProblemDescription(false)} />
 
       <Modal
         isOpen={showAlgorithmIdea}

@@ -1,11 +1,12 @@
 .header {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 16px;
+  padding: 0 12px;
   background: var(--card-bg);
   border-bottom: 1px solid var(--border-color);
-  height: 48px;
+  height: 46px;
   flex-shrink: 0;
 }
 
@@ -24,7 +25,10 @@
 }
 
 .header-center {
-  flex: 2;
+  position: absolute;
+  left: 50%;
+  max-width: calc(100% - 300px);
+  transform: translateX(-50%);
   text-align: center;
 }
 
@@ -33,9 +37,13 @@
 }
 
 .title {
-  font-size: 18px;
-  font-weight: 600;
+  max-width: 100%;
+  overflow: hidden;
+  font-size: 16px;
+  font-weight: 700;
   color: var(--text-primary);
+  text-overflow: ellipsis;
+  white-space: nowrap;
   transition: color 0.2s;
 }
 
@@ -51,7 +59,12 @@
   gap: 12px;
 }
 
+.problem-book-btn,
+.problem-description-btn,
 .algorithm-idea-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   padding: 6px 12px;
   background: var(--primary-color);
   color: white;
@@ -61,9 +74,13 @@
   transition: background 0.2s;
 }
 
-.algorithm-idea-btn:hover {
-  background: var(--primary-hover);
-}
+.algorithm-idea-btn { background: var(--primary-color); }
+.problem-book-btn,
+.problem-description-btn { background: #e7f0eb; color: #245642; border: 1px solid #c8d9ce; }
+.problem-book-btn:hover,
+.problem-description-btn:hover { background: #d9e9df; }
+.problem-book-icon { font-size: 16px; line-height: 1; }
+.algorithm-idea-btn:hover { background: var(--primary-hover); }
 
 .github-link {
   display: flex;
@@ -88,4 +105,44 @@
 
 .star-count {
   font-weight: 500;
+}
+
+@media (max-width: 760px) {
+  .header {
+    height: 48px;
+    min-height: 48px;
+    gap: 8px;
+    padding: 0 10px;
+  }
+
+  .header-left {
+    display: none;
+  }
+
+  .header-center {
+    position: static;
+    flex: 1;
+    max-width: none;
+    transform: none;
+    text-align: left;
+  }
+
+  .title {
+    font-size: 16px;
+    white-space: nowrap;
+  }
+
+  .header-right {
+    flex: 0 0 auto;
+    gap: 6px;
+  }
+
+  .problem-book-btn,
+  .problem-description-btn,
+  .algorithm-idea-btn,
+  .github-link {
+    padding: 6px 8px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
 }
