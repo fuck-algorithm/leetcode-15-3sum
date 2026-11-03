@@ -23,6 +23,7 @@ describe('Canvas visualization', () => {
     expect(container.querySelector('.stage-panel')?.getAttribute('data-operation')).toBe(steps[0].operation);
     expect(container.querySelector('.operation-badge')?.textContent).toBe('init');
     expect(container.querySelector('.canvas-legend')).not.toBeNull();
+    expect(container.querySelector('#sum-flow-arrow')).not.toBeNull();
 
     rerender(<Canvas currentStep={steps[1]} />);
     expect(container.querySelectorAll('[data-node-id^="array-"]')).toHaveLength(6);

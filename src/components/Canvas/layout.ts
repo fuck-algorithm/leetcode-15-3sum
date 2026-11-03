@@ -11,7 +11,7 @@ export function createCanvasLayout(step: AlgorithmStep, dimensions: CanvasDimens
   const arrayStartX = Math.max(startX, Math.round((dimensions.width - arrayWidth) / 2));
   const stageY = 24;
   const arrayY = Math.max(208, Math.round(dimensions.height * 0.38));
-  const detailY = arrayY + cellHeight + 124;
+  const detailY = arrayY + cellHeight + 148;
   const resultY = detailY + 124;
   const resultColumns = Math.max(1, Math.floor(contentWidth / 164));
   const resultRows = Math.ceil(step.result.length / resultColumns);

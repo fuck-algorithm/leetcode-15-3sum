@@ -184,32 +184,52 @@ function drawSearchWindow(g: CanvasGroupSelection, pointers: PointerState, layou
 
   windowGroup.selectAll<SVGTextElement, string>('.window-label').data(['label']).join('text')
     .attr('x', x + width / 2)
-    .attr('y', layout.arrayY + layout.cellHeight + 27)
+    .attr('y', layout.arrayY - 14)
     .attr('class', 'window-label')
-    .text('当前搜索窗口');
+    .text(`搜索范围 ${pointers.left}–${pointers.right}`);
 }
 
 function drawDecisionConnectors(g: CanvasGroupSelection, pointers: PointerState, layout: CanvasLayout) {
   if (pointers.i < 0 || pointers.left < 0 || pointers.right < 0) {
-    g.selectAll<SVGPathElement, string>('.sum-connector').data([]).join('path');
-    g.selectAll<SVGTextElement, string>('.sum-connector-label').data([]).join('text');
+    g.selectAll<SVGGElement, string>('.sum-flow').data([]).join('g');
+    g.selectAll<SVGTextElement, string>('.sum-total-label').data([]).join('text');
     return;
   }
 
-  const points = [pointers.i, pointers.left, pointers.right]
-    .map(index => layout.arrayStartX + index * (layout.cellWidth + layout.gap) + layout.cellWidth / 2);
-  const y = layout.arrayY + layout.cellHeight + 34;
+  const centers = [pointers.i, pointers.left, pointers.right].map(index =>
+    layout.arrayStartX + index * (layout.cellWidth + layout.gap) + layout.cellWidth / 2
+  );
+  const top = layout.arrayY + layout.cellHeight + 8;
+  const arrowEnd = top + 38;
+  const flows = [
+    { id: 'i', x: centers[0], label: 'i 固定' },
+    { id: 'left', x: centers[1], label: 'left 候选' },
+    { id: 'right', x: centers[2], label: 'right 候选' }
+  ];
 
-  g.selectAll<SVGPathElement, string>('.sum-connector').data(['sum']).join('path')
-    .attr('class', 'sum-connector')
-    .attr('d', `M${points[0]},${y} C${points[0]},${y + 18} ${points[1]},${y + 18} ${points[1]},${y} S${points[2]},${y + 18} ${points[2]},${y}`)
-    .attr('stroke-dashoffset', 0);
+  g.selectAll<SVGGElement, typeof flows[number]>('.sum-flow').data(flows, flow => flow.id).join('g')
+    .attr('class', flow => `sum-flow sum-flow--${flow.id}`)
+    .each(function drawFlow(flowData) {
+      const flow = d3.select(this);
+      const badgeWidth = flowData.label.length * 6.4 + 12;
+      flow.selectAll<SVGPathElement, string>('path.sum-connector').data(['path']).join('path')
+        .attr('class', 'sum-connector')
+        .attr('d', `M${flowData.x},${top} L${flowData.x},${arrowEnd}`)
+        .attr('marker-end', 'url(#sum-flow-arrow)');
+      flow.selectAll<SVGRectElement, string>('rect.sum-flow-badge').data(['badge']).join('rect')
+        .attr('x', flowData.x - badgeWidth / 2).attr('y', arrowEnd + 7)
+        .attr('width', badgeWidth).attr('height', 18).attr('rx', 8)
+        .attr('class', 'sum-flow-badge');
+      flow.selectAll<SVGTextElement, string>('text.sum-connector-label').data([flowData.label]).join('text')
+        .attr('x', flowData.x).attr('y', arrowEnd + 20).attr('class', 'sum-connector-label')
+        .text(value => value);
+    });
 
-  g.selectAll<SVGTextElement, string>('.sum-connector-label').data(['label']).join('text')
-    .attr('x', (points[0] + points[2]) / 2)
-    .attr('y', y + 18)
-    .attr('class', 'sum-connector-label')
-    .text('固定值 + left + right');
+  g.selectAll<SVGTextElement, string>('.sum-total-label').data(['sum']).join('text')
+    .attr('x', (centers[0] + centers[2]) / 2)
+    .attr('y', arrowEnd + 48)
+    .attr('class', 'sum-total-label')
+    .text('三项相加后与 0 比较');
 }
 
 function getNodeStatus(item: AlgorithmStep['arrayState'][number], step: AlgorithmStep) {

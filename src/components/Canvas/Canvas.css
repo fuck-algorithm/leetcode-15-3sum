@@ -62,8 +62,13 @@
 .legend-label { fill: var(--text-secondary); font-size: 10px; }
 .search-window { fill: rgba(37,99,235,.055); stroke: rgba(37,99,235,.28); stroke-width: 1; stroke-dasharray: 4 4; }
 .window-label { fill: var(--primary-color); font-size: 11px; text-anchor: middle; }
-.sum-connector { fill: none; stroke: rgba(100,116,139,.42); stroke-width: 1.5; stroke-linecap: round; }
-.sum-connector-label { fill: var(--text-secondary); font-size: 10px; text-anchor: middle; }
+.sum-connector { fill: none; stroke: rgba(100,116,139,.58); stroke-width: 1.5; stroke-linecap: round; }
+.sum-flow--i .sum-connector { stroke: #2563eb; }
+.sum-flow--left .sum-connector { stroke: #059669; }
+.sum-flow--right .sum-connector { stroke: #d97706; }
+.sum-flow-badge { fill: #fff; stroke: #d7e0e8; stroke-width: 1; }
+.sum-connector-label { fill: var(--text-primary); font-size: 9px; font-weight: 600; text-anchor: middle; }
+.sum-total-label { fill: var(--text-secondary); font-size: 9px; text-anchor: middle; }
 .array-cell { fill: #f1f5f9; stroke: #cbd5e1; stroke-width: 1; transition: fill 180ms ease, stroke 180ms ease; }
 .node-status { fill: var(--text-secondary); font-size: 9px; text-anchor: middle; }
 .array-cell-group[data-status="current"] .cell-value, .array-cell-group[data-status="compare"] .cell-value, .array-cell-group[data-status="done"] .cell-value { font-size: 11px; }

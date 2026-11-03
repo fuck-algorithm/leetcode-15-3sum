@@ -61,6 +61,11 @@ export function Canvas({ currentStep, playbackSpeed = 1 }: CanvasProps) {
   return (
     <div className={`canvas-container ${isDragging ? 'is-dragging' : ''}`} ref={containerRef}>
       <svg ref={svgRef} width="100%" height="100%" viewBox={`0 0 ${dimensions.width} ${dimensions.height}`} role="img" aria-label="三数之和算法可视化画布">
+        <defs>
+          <marker id="sum-flow-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+            <path d="M0 0L10 5L0 10Z" fill="#64748b" />
+          </marker>
+        </defs>
         <g ref={contentRef} className="canvas-content"></g>
       </svg>
 

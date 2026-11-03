@@ -19,6 +19,9 @@ test('visually demonstrates stable focus states across semantic steps', async ({
   await page.keyboard.press('ArrowRight');
   await expect(stage).toHaveAttribute('data-operation', 'compare');
   await expect(page.locator('[data-status="compare"]')).toHaveCount(2);
+  await expect(page.locator('.sum-flow')).toHaveCount(3);
+  await expect(page.locator('.sum-flow-badge')).toHaveCount(3);
+  await expect(page.locator('.sum-total-label')).toContainText('三项相加后与 0 比较');
   await expect(page.locator('.move-label')).toHaveCount(0);
 
   await page.getByRole('button', { name: '示例2' }).click();
