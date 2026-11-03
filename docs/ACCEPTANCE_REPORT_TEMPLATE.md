@@ -1,9 +1,9 @@
-# 验收报告（Round 2）
+# 验收报告（Round 3）
 
 - 题目：LeetCode 15. 三数之和
 - 仓库：git@github.com:fuck-algorithm/leetcode-15-3sum
 - 日期：2026-11-04
-- 阶段：M3（数组防重叠与数据流教学层优化；自动化与视觉证据更新）
+- 阶段：M3（演示主体视口居中；自动化验证通过，等待本轮 Pages 部署）
 
 ## B1–B7
 
@@ -14,49 +14,51 @@
 | B3 | PASS | 原 15 项必过集合及新增回归全部通过；浏览器回归 21/21（含画布抽屉、独立题目/思路弹窗与 3000 元素虚拟滚动） |
 | B4 | PASS | AC-001–022 自动化通过；AC-023 步骤、状态、图例、流程标注及 reduced-motion 检查通过 |
 | B5 | PASS | 自动化与桌面画面复核未发现 P0/P1 缺陷 |
-| B6 | PASS | Rubric 暂评 84/100；自动交互与两档桌面视口复核通过 |
+| B6 | PASS | Rubric 暂评 84/100；自动交互、居中坐标和两档桌面视口复核通过 |
 | B7 | PASS | Playwright 输出、两档与 reduced-motion 截图、1x/3x 视频、覆盖率及 GitHub Actions 部署记录齐全 |
 
 ## 自动化验收结果
 
-- `npm run qa:full`：PASS（包含 lint、type-check、build、test:coverage、21/21 test:e2e）
+- `npm run qa:full`：PASS（本轮 Round 3，包含 lint、type-check、build、test:coverage、21/21 test:e2e）
 - `npm run qa:guard`：PASS
 - `npm run lint`：PASS
 - `npm run type-check`：PASS
 - `npm run build`：PASS（Vite 7.3.0，636 modules）
 - GitHub Pages 首页：HTTP 200，`text/html`
 - 状态栏：`server-url.txt` 输出包含 GitHub Pages 超链接；文件已被 `.gitignore` 忽略
-- `npm run test:unit`：PASS（11 tests）
-- `npm run test:coverage`：PASS，lines 89.45%、functions 91.48%、branches 78.94%
+- `npm run test:unit`：PASS（12 tests）
+- `npm run test:coverage`：PASS，lines 89.48%、functions 91.48%、branches 79.00%
 - `npm run test:e2e`：PASS（21/21，含题目描述与算法思路分离弹窗、画布代码抽屉、随机跳转、3 档视口及 3000 元素虚拟数组滑动验收）
 - 桌面画布面积/视口（代码抽屉默认收起）：1366×768 为 82.59%，1920×1080 为 87.60%；画布宽度分别占 99.4%、99.6%。代码按需覆盖为抽屉，打开后画布几何边界不缩小。E2E-017 验证抽屉显示时画布边界不缩小。
 - 3000 元素实测：每帧保留至多 96 个数组节点；鼠标平移按单次约 600 SVG px 增量移动，全局位置滑块可直接到末端；步骤快照限制在 40 帧内
 - `git diff --check`：PASS
 - 验收 Rubric 暂评：84/100（分镜、信息密度提升后 4/5；其余按上一轮记录，远程 Actions 尚未由本次改动触发）
 - GitHub Actions run `41675540552`：PASS；build、quality gates、Pages artifact 与 deploy 全部成功；Pages 首页 HTTP 200 且加载本次构建资源。
-- B1–B7：PASS（AC 全通过、E2E 21/21、Rubric 暂评 84/100、部署和证据齐全）
+- 本轮 Round 3 镜头居中坐标复核：短样例主体中心与 SVG 画布中心均为 x=683px，长数组仍从可平移原点布局；样例及 3000 项窗口无节点碰撞。
 
-## 本轮视觉改进（Round 2）
+## 本轮视觉改进（Round 3）
 
-- 数组格子最小宽度锁定为 44px、中心距至少 56px；长数组虚拟化仍保留可读尺寸，防止单元格挤成窄条。
-- 重排信息层级：上方说明算法数据流，中间数组显式说明排序下标和原始下标，下方分开展示求和决策、变量与结果。
-- 提升数组行与求和面板间距；求和面板展示本步解释，辅助线标注参与求和的角色。
-- Chromium 1366×768、1920×1080 截图及 1x/3x 播放录屏已更新到 `artifacts/`；样例 14 个步骤和 3000 项窗口均无数组节点包围盒重叠。
+- 短数组每帧整体居中；数组格子、下标、i/left/right 指针、搜索窗口、求和连线与跳过标记共用居中坐标原点，不再出现“数组在中间、指针留在左侧”的错位。
+- 长数组仍锚定可滚动画布原点，保留虚拟窗口、拖拽和平移导航。
+- 首屏中心坐标实测：1366×768 的数组主体中心 x=683px，与 SVG 中心 x=683px 重合；各步骤与 3000 项视口无节点重叠。
+- 新截图及 1x/3x 录屏已更新到 `artifacts/`。
 
 ## 失败闭环记录
 
-1. Round 2：原布局 `cellWidth` 可缩至 2px，导致数据值/下标不可读；设定最小格宽与步距后，单测和浏览器坐标检查通过。
-2. Round 2：步骤说明缺少整体算法流程，求和判断区解说缺乏视觉区隔；增加常驻流程线、明确数组副标题、决策面板文字与不同底色后通过视觉复核。
-3. E2E-001 首轮顶部栏总占比 27.7%；压缩 header/input/control 后复测通过。
-2. E2E-006 初始帧缺少当前焦点；增加初始化帧 current 状态后通过。
-3. E2E-010 dialog 语义缺失；补 role/aria-label 后通过。
-4. E2E-013 速度菜单受固定层覆盖；调整控件层级/菜单位置后单测与全量复测通过。
-5. E2E-008 进度条事件目标被 controls-main 透明 flex 盒拦截；修正 pointer-events 后全量复测通过。
+1. Round 3：只调整数组起始坐标会造成指针/连线沿用旧原点；将所有数组相关标记统一切换到 `arrayStartX` 后复测，短数组居中一致，长数组坐标与虚拟滚动保持稳定。
+2. Round 2：原布局 `cellWidth` 可缩至 2px，导致数据值/下标不可读；设定最小格宽与步距后，单测和浏览器坐标检查通过。
+3. Round 2：步骤说明缺少整体算法流程，求和判断区解说缺乏视觉区隔；增加常驻流程线、明确数组副标题、决策面板文字与不同底色后通过视觉复核。
+4. E2E-001 首轮顶部栏总占比 27.7%；压缩 header/input/control 后复测通过。
+5. E2E-006 初始帧缺少当前焦点；增加初始化帧 current 状态后通过。
+6. E2E-010 dialog 语义缺失；补 role/aria-label 后通过。
+7. E2E-013 速度菜单受固定层覆盖；调整控件层级/菜单位置后单测与全量复测通过。
+8. E2E-008 进度条事件目标被 controls-main 透明 flex 盒拦截；修正 pointer-events 后全量复测通过。
 
 ## 未完成项与低优先级事项
 
 - 截图与视频保存在本地忽略目录 `artifacts/`，未提交二进制证据；自动化 CI 与 Pages 部署已实跑成功。
 - renderer 仍超过 250 行，后续可按语义层拆分，不影响本轮教学可读性与质量门禁。
+- 本轮居中改动已通过本地质量门禁，推送 main 并等待对应 Pages workflow 后复核线上居中效果。
 
 ## 暂定 Rubric（0–5）
 

@@ -13,7 +13,7 @@ interface ViewportControls {
   scrollToFraction: (fraction: number) => void;
 }
 
-const INITIAL_TRANSFORM = d3.zoomIdentity.translate(16, 18);
+const INITIAL_TRANSFORM = d3.zoomIdentity.translate(0, 18);
 
 export function useCanvasViewport(
   svgRef: RefObject<SVGSVGElement | null>,

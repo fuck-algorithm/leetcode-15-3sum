@@ -23,7 +23,7 @@ export function renderCanvas(
 
   const layout = createCanvasLayout(currentStep, dimensions);
   const { arrayState, pointers, result, description, variables, decision } = currentStep;
-  const range = getVisibleArrayRange(arrayState.length, dimensions.width, transform, layout.startX, layout.cellWidth + layout.gap);
+  const range = getVisibleArrayRange(arrayState.length, dimensions.width, transform, layout.arrayStartX, layout.cellWidth + layout.gap);
   const visibleNodes = createVisibleFrame(arrayState, range, visibleFocusIndices(currentStep));
   const visibleStep = { ...currentStep, arrayState: visibleNodes };
   const updateDuration = motionDuration('move', playbackSpeed, typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches);
@@ -38,9 +38,9 @@ export function renderCanvas(
 
   const arrayGroup = sceneLayers.nodes.selectAll<SVGGElement, string>('.array-group').data(['array']).join('g').attr('class', 'array-group');
   arrayGroup.selectAll<SVGTextElement, string>('.array-title').data(['title']).join('text')
-    .attr('x', layout.startX).attr('y', layout.arrayY - 82).attr('class', 'section-title array-title').text('排序后的数组');
+    .attr('x', layout.arrayStartX).attr('y', layout.arrayY - 82).attr('class', 'section-title array-title').text('排序后的数组');
   arrayGroup.selectAll<SVGTextElement, string>('.array-subtitle').data(['subtitle']).join('text')
-    .attr('x', layout.startX).attr('y', layout.arrayY - 64).attr('class', 'array-subtitle')
+    .attr('x', layout.arrayStartX).attr('y', layout.arrayY - 64).attr('class', 'array-subtitle')
     .text('格子下方是排序下标；“原”标记保留输入位置');
 
   drawSearchWindow(arrayGroup, pointers, layout);
@@ -55,7 +55,7 @@ export function renderCanvas(
       exit => { fadeOutAndRemove(exit, EXIT_DURATION); return exit; }
     )
     .each(function updateCell(item) {
-      const x = layout.startX + item.index * (layout.cellWidth + layout.gap);
+      const x = layout.arrayStartX + item.index * (layout.cellWidth + layout.gap);
       drawArrayCell(d3.select(this), item, item.index, x, layout, visibleStep, updateDuration);
     });
 
@@ -166,7 +166,7 @@ function drawSearchWindow(g: CanvasGroupSelection, pointers: PointerState, layou
     return;
   }
 
-  const x = layout.startX + pointers.left * (layout.cellWidth + layout.gap) - layout.gap / 2;
+  const x = layout.arrayStartX + pointers.left * (layout.cellWidth + layout.gap) - layout.gap / 2;
   const width = (pointers.right - pointers.left + 1) * layout.cellWidth
     + (pointers.right - pointers.left) * layout.gap
     + layout.gap;
@@ -197,7 +197,7 @@ function drawDecisionConnectors(g: CanvasGroupSelection, pointers: PointerState,
   }
 
   const points = [pointers.i, pointers.left, pointers.right]
-    .map(index => layout.startX + index * (layout.cellWidth + layout.gap) + layout.cellWidth / 2);
+    .map(index => layout.arrayStartX + index * (layout.cellWidth + layout.gap) + layout.cellWidth / 2);
   const y = layout.arrayY + layout.cellHeight + 34;
 
   g.selectAll<SVGPathElement, string>('.sum-connector').data(['sum']).join('path')
@@ -295,7 +295,7 @@ function drawPointer(
   updateDuration: number
 ) {
   const color = POINTER_COLORS[key];
-  const pointerX = layout.startX + index * (layout.cellWidth + layout.gap) + layout.cellWidth / 2;
+  const pointerX = layout.arrayStartX + index * (layout.cellWidth + layout.gap) + layout.cellWidth / 2;
   const pointerGroup = g.selectAll<SVGGElement, string>(`.pointer.${key}`).data(index >= 0 ? [key] : []).join(enter => enter.append('g'), update => update, exit => exit.remove())
     .attr('class', `pointer ${key} ${active ? 'moving' : ''}`);
   if (index < 0) return;
@@ -358,8 +358,8 @@ function drawMovement(
     const to = current[key];
     if (from < 0 || to < 0 || from === to) return;
 
-    const x1 = from * (layout.cellWidth + layout.gap) + layout.cellWidth / 2;
-    const x2 = to * (layout.cellWidth + layout.gap) + layout.cellWidth / 2;
+    const x1 = layout.arrayStartX + from * (layout.cellWidth + layout.gap) + layout.cellWidth / 2;
+    const x2 = layout.arrayStartX + to * (layout.cellWidth + layout.gap) + layout.cellWidth / 2;
     const y = layout.arrayY + 78 + idx * 20;
     const color = key === 'right' ? POINTER_COLORS.right : POINTER_COLORS.left;
     const path = g.selectAll<SVGPathElement, string>(`.move-line.${key}`).data([key]).join('path')
@@ -397,7 +397,7 @@ function drawSkipMarkers(g: CanvasGroupSelection, step: AlgorithmStep, layout: C
   const markers = step.animationType === 'skip' ? step.arrayState.filter(item => item.highlight === 'skip') : [];
   g.selectAll<SVGGElement, AlgorithmStep['arrayState'][number]>('.skip-marker').data(markers, item => `skip-${item.originalIndex}`).join('g')
     .attr('class', 'skip-marker')
-    .attr('transform', item => `translate(${layout.startX + item.index * (layout.cellWidth + layout.gap)},${layout.arrayY})`)
+    .attr('transform', item => `translate(${layout.arrayStartX + item.index * (layout.cellWidth + layout.gap)},${layout.arrayY})`)
     .each(function drawMarker() {
       const marker = d3.select(this);
       marker.selectAll<SVGLineElement, string>('line').data(['a', 'b']).join('line')

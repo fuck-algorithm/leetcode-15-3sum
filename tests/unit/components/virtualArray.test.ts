@@ -15,11 +15,19 @@ describe('virtual array window', () => {
     expect(range.end - range.start).toBeLessThanOrEqual(96);
   });
 
-  it('keeps instructional cells wide enough for readable values and index labels', () => {
+  it('centers short arrays while keeping instructional cells readable', () => {
     const step = generateSteps([-1, 0, 1, 2, -1, -4])[0];
     const layout = createCanvasLayout(step, { width: 920, height: 520 });
     expect(layout.cellWidth).toBeGreaterThanOrEqual(44);
     expect(layout.cellWidth + layout.gap).toBeGreaterThanOrEqual(56);
+    expect(layout.arrayStartX + layout.arrayWidth / 2).toBe(460);
+  });
+
+  it('keeps long virtual arrays anchored to the scrollable canvas origin', () => {
+    const step = generateSteps(Array.from({ length: 100 }, (_, index) => index - 50))[0];
+    const layout = createCanvasLayout(step, { width: 920, height: 520 });
+    expect(layout.arrayStartX).toBe(layout.startX);
+    expect(layout.arrayWidth).toBeGreaterThan(920);
   });
 
   it('clamps ranges at the beginning and end, including zoom', () => {
