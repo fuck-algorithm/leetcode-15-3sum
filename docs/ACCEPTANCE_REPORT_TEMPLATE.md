@@ -3,7 +3,7 @@
 - 题目：LeetCode 15. 三数之和
 - 仓库：git@github.com:fuck-algorithm/leetcode-15-3sum
 - 日期：2026-11-05
-- 阶段：M3（逐元素坐标审计与窄屏布局修复；等待本轮 Pages 部署）
+- 阶段：M3（逐元素坐标审计与窄屏布局修复；本轮 Pages 已部署并实测）
 
 ## B1–B7
 
@@ -33,8 +33,9 @@
 - 3000 元素实测：每帧保留至多 96 个数组节点；鼠标平移按单次约 600 SVG px 增量移动，全局位置滑块可直接到末端；步骤快照限制在 40 帧内
 - `git diff --check`：PASS
 - 验收 Rubric 暂评：84/100（分镜、信息密度提升后 4/5；本地质量门禁通过，部署见本轮 Actions）
-- 上轮 GitHub Actions run `41675540552`：PASS；build、quality gates、Pages artifact 与 deploy 全部成功。
-- 本轮 Round 4：compare 帧三条带箭头数据流、徽标均可见；样例及 3000 项窗口的数组节点无重叠。整体面板组实测中心 x=683px，与 1366×768 画布中心一致。
+- GitHub Actions run `41921698906`：PASS；quality gates、Pages artifact 与 deploy 全部成功。
+- Round 4：compare 帧三条带箭头数据流、徽标均可见；样例及 3000 项窗口的数组节点无重叠。整体面板组实测中心 x=683px，与 1366×768 画布中心一致。
+- Round 6 Pages run `41921698906`：PASS，quality gates 与 Deploy to GitHub Pages 均成功；线上 compare 帧在 1366、820、390px 的碰撞/裁切/页面滚动检查均为 false。线上 bundle `index-Dns4M911.js`。
 
 ## 本轮视觉改进（Round 5）
 
@@ -58,9 +59,8 @@
 
 ## 未完成项与低优先级事项
 
-- 截图与视频保存在本地忽略目录 `artifacts/`，未提交二进制证据；自动化 CI 与 Pages 部署已实跑成功。
-- renderer 仍超过 250 行，后续可按语义层拆分，不影响本轮教学可读性与质量门禁。
-- 整体居中与数据流箭头改动已通过本地质量门禁，推送 main 并等待本轮 Pages workflow 后复核线上画面。
+- 本地坐标审计截图存于忽略目录 `artifacts/`，未提交二进制；线上部署已由 Actions 完成。
+- renderer 仍超过 250 行，后续可按渲染层拆分，不影响当前回归结果。
 
 ## 暂定 Rubric（0–5）
 
@@ -74,7 +74,7 @@
 | 交互可控性 | 4 | 快捷键、拖拽、缩放、速度通过 E2E |
 | 多解法可比性 | N/A | 当前为单解法题目 |
 | 稳定性 | 3 | 输入边界、覆盖率、E2E通过 |
-| 工程发布质量 | 3 | Pages workflow 和 CI steps 已配置，远程 Pages 未发布验证 |
+| 工程发布质量 | 4 | Actions build/quality gates/deploy 实跑成功，Pages HTTP 200，线上 bundle 已核对 |
 | 文档完整性 | 4 | 七份 docs 已补齐 |
 
-最终结论：**PASS**。本轮视觉优化通过全套本地质量门禁（21/21 E2E），GitHub Actions run `41675540552` 成功完成 Pages 部署，线上首页 HTTP 200 且使用本次构建资源。
+最终结论：**PASS**。逐元素坐标复查覆盖桌面、平板与手机 compare 帧；本地质量门禁通过（21/21 E2E），GitHub Actions run `41921698906` 成功部署，线上页面及本次 bundle 已验证。
