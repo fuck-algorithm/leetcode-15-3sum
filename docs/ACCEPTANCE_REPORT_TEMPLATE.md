@@ -1,4 +1,4 @@
-# 验收报告（Round 5）
+# 验收报告（Round 6）
 
 - 题目：LeetCode 15. 三数之和
 - 仓库：git@github.com:fuck-algorithm/leetcode-15-3sum
@@ -19,15 +19,15 @@
 
 ## 自动化验收结果
 
-- `npm run qa:full`：PASS（本轮 Round 4，包含 lint、type-check、build、test:coverage、21/21 test:e2e）
+- `npm run qa:full`：PASS（本轮 Round 6，包含 lint、type-check、build、test:coverage、21/21 test:e2e）
 - `npm run qa:guard`：PASS
 - `npm run lint`：PASS
 - `npm run type-check`：PASS
 - `npm run build`：PASS（Vite 7.3.0，636 modules）
 - GitHub Pages 首页：HTTP 200，`text/html`
 - 状态栏：`server-url.txt` 输出包含 GitHub Pages 超链接；文件已被 `.gitignore` 忽略
-- `npm run test:unit`：PASS（12 tests）
-- `npm run test:coverage`：PASS，lines 88.12%、functions 89.58%、branches 79.25%
+- `npm run test:unit`：PASS（13 tests）
+- `npm run test:coverage`：PASS，lines 88.42%、functions 89.58%、branches 81.54%
 - `npm run test:e2e`：PASS（21/21，含题目描述与算法思路分离弹窗、画布代码抽屉、随机跳转、3 档视口及 3000 元素虚拟数组滑动验收）
 - 桌面画布面积/视口（代码抽屉默认收起）：1366×768 为 82.59%，1920×1080 为 87.60%；画布宽度分别占 99.4%、99.6%。代码按需覆盖为抽屉，打开后画布几何边界不缩小。E2E-017 验证抽屉显示时画布边界不缩小。
 - 3000 元素实测：每帧保留至多 96 个数组节点；鼠标平移按单次约 600 SVG px 增量移动，全局位置滑块可直接到末端；步骤快照限制在 40 帧内
@@ -38,10 +38,10 @@
 
 ## 本轮视觉改进（Round 5）
 
-- 在 1366×768、820×900、390×844 三种真实浏览器视口，逐步审查 compare 步骤的操作卡、工具栏、图例、数组标题/格子、搜索窗口、判断卡、变量卡及 SVG 边界。
-- 修复坐标误用：数组标题、数组格子、指针、搜索窗口和箭头统一以 `nodesX` 为基准；修复 820px 布局信息卡纵向交叠，以及 390px 下说明栏挤压、图例/工具栏相交与卡片边界裁切。
-- 重新分配移动/紧凑视口的步骤卡高度和数组/面板间距；小屏工具栏放在图例右侧，小屏判断与变量卡上下排布。
-- 复核输出：三个视口中工具栏不与步骤卡或图例重叠，判断/变量卡不相交且在 SVG 内，页面没有纵向溢出；坐标与截图证据保存在 `artifacts/coordinate-mobile-reflow.png` 和 Playwright 输出中。
+- 在 1366×768、820×844、390×844 三种真实浏览器视口，逐项审查 compare 步骤的步骤卡、工具栏、图例、数组标题/格子、搜索窗口、判断卡、变量卡、结果标题与 SVG 边界。
+- 修复坐标基准不一致：数组标题、节点、指针、搜索窗口、箭头统一使用 `nodesX`；工具栏避开左上图例；窄屏判定卡与变量卡纵向分隔，变量卡与 SVG 底边保留空间。
+- 手机步骤栏采用短流程文案和单行说明；数组区及决策区相应下移，避免说明、数组标题和指针区域交叠。
+- 实测结果：三视口下步骤卡/工具栏、图例/工具栏不相交；判断/变量卡不相交，变量卡未被 SVG 裁切，页面无纵向滚动。证据：`artifacts/coordinate-mobile-reflow.png`。
 
 ## 失败闭环记录
 
