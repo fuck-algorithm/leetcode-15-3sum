@@ -23,7 +23,7 @@ export function renderCanvas(
 
   const layout = createCanvasLayout(currentStep, dimensions);
   const { arrayState, pointers, result, description, variables, decision } = currentStep;
-  const range = getVisibleArrayRange(arrayState.length, dimensions.width, transform, layout.arrayStartX, layout.cellWidth + layout.gap);
+  const range = getVisibleArrayRange(arrayState.length, dimensions.width, transform, layout.nodesX, layout.cellWidth + layout.gap);
   const visibleNodes = createVisibleFrame(arrayState, range, visibleFocusIndices(currentStep));
   const visibleStep = { ...currentStep, arrayState: visibleNodes };
   const updateDuration = motionDuration('move', playbackSpeed, typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches);
@@ -38,9 +38,9 @@ export function renderCanvas(
 
   const arrayGroup = sceneLayers.nodes.selectAll<SVGGElement, string>('.array-group').data(['array']).join('g').attr('class', 'array-group');
   arrayGroup.selectAll<SVGTextElement, string>('.array-title').data(['title']).join('text')
-    .attr('x', layout.arrayStartX).attr('y', layout.arrayY - 82).attr('class', 'section-title array-title').text('排序后的数组');
+    .attr('x', layout.nodesX).attr('y', layout.arrayTop - 82).attr('class', 'section-title array-title').text('排序后的数组');
   arrayGroup.selectAll<SVGTextElement, string>('.array-subtitle').data(['subtitle']).join('text')
-    .attr('x', layout.arrayStartX).attr('y', layout.arrayY - 64).attr('class', 'array-subtitle')
+    .attr('x', layout.nodesX).attr('y', layout.arrayTop - 64).attr('class', 'array-subtitle')
     .text('格子下方是排序下标；“原”标记保留输入位置');
 
   drawSearchWindow(arrayGroup, pointers, layout);
@@ -55,7 +55,7 @@ export function renderCanvas(
       exit => { fadeOutAndRemove(exit, EXIT_DURATION); return exit; }
     )
     .each(function updateCell(item) {
-      const x = layout.arrayStartX + item.index * (layout.cellWidth + layout.gap);
+      const x = layout.nodesX + item.index * (layout.cellWidth + layout.gap);
       drawArrayCell(d3.select(this), item, item.index, x, layout, visibleStep, updateDuration);
     });
 
@@ -126,8 +126,8 @@ function drawStage(
   panel.selectAll<SVGRectElement, string>('rect.stage-panel-bg').data(['background']).join('rect')
     .attr('x', layout.contentStartX)
     .attr('y', layout.stageY)
-    .attr('width', Math.min(layout.contentWidth, viewportWidth - layout.contentStartX - 24))
-    .attr('height', 104)
+    .attr('width', Math.min(layout.stageWidth, viewportWidth - layout.contentStartX * 2))
+    .attr('height', layout.stageHeight)
     .attr('rx', 8)
     .attr('class', 'stage-panel-bg');
 
@@ -135,30 +135,32 @@ function drawStage(
     .attr('x', layout.contentStartX)
     .attr('y', layout.stageY)
     .attr('width', 5)
-    .attr('height', 104)
+    .attr('height', layout.stageHeight)
     .attr('rx', 3)
     .attr('class', `stage-accent ${step.decision?.relation ?? step.animationType}`);
 
   panel.selectAll<SVGTextElement, string>('text.stage-kicker').data(['title']).join('text')
-    .attr('x', layout.contentStartX + 18).attr('y', layout.stageY + 28).attr('class', 'stage-kicker').text(STAGE_TITLES[step.animationType]);
+    .attr('x', layout.contentStartX + 18).attr('y', layout.stageY + (layout.mobile ? 26 : 28)).attr('class', 'stage-kicker').text(STAGE_TITLES[step.animationType]);
   panel.selectAll<SVGTextElement, string>('text.operation-badge').data(['operation']).join('text')
-    .attr('x', layout.contentStartX + 18).attr('y', layout.stageY + 48).attr('class', 'operation-badge').text(step.operation);
+    .attr('x', layout.contentStartX + (layout.mobile ? 96 : 18)).attr('y', layout.stageY + (layout.mobile ? 28 : 48)).attr('class', 'operation-badge').text(step.operation);
 
   const relation = step.decision?.relation;
   panel.selectAll<SVGTextElement, NonNullable<typeof relation>>('text.relation-badge')
-    .data(relation ? [relation] : []).join('text')
+    .data(relation && !layout.mobile ? [relation] : []).join('text')
     .attr('x', layout.contentStartX + 18).attr('y', layout.stageY + 68)
     .attr('class', value => `relation-badge ${value}`).text(value => getRelationText(value));
 
   const narration = step.narration || description;
-  const wrappedNarration = appendWrappedText(panel, narration, layout.contentStartX + 118, layout.stageY + 30,
-    Math.min(560, layout.contentWidth - 454), 18, 'step-description');
-  wrappedNarration.selectAll<SVGTSpanElement, string>('tspan').attr('dy', (_, index) => index === 0 ? 0 : 28);
+  const wrappedNarration = appendWrappedText(panel, narration, layout.narrationX, layout.narrationY,
+    layout.narrationWidth, 16, 'step-description');
+  wrappedNarration.selectAll<SVGTSpanElement, string>('tspan').attr('dy', (_, index) => index === 0 ? 0 : 18);
   if (Number(wrappedNarration.attr('data-line-count')) > 1) panel.select('text.stage-kicker').attr('y', layout.stageY + 24);
 
   panel.selectAll<SVGTextElement, string>('text.data-flow-guide').data(['guide']).join('text')
-    .attr('x', layout.contentStartX + 118).attr('y', layout.stageY + 72).attr('class', 'data-flow-guide')
-    .text('数据流：原数组 → 排序 → 固定 i → 比较 left + right → 移动指针');
+    .attr('x', layout.mobile ? layout.contentStartX + 18 : layout.contentStartX + 118)
+    .attr('y', layout.mobile ? layout.stageY + 116 : layout.stageY + 84)
+    .attr('class', 'data-flow-guide')
+    .text(layout.mobile ? '流程：排序 → 固定 i → 比较 → 移动指针' : '数据流：原数组 → 排序 → 固定 i → 比较 left + right → 移动指针');
 }
 
 function drawSearchWindow(g: CanvasGroupSelection, pointers: PointerState, layout: CanvasLayout) {
@@ -167,7 +169,7 @@ function drawSearchWindow(g: CanvasGroupSelection, pointers: PointerState, layou
     return;
   }
 
-  const x = layout.arrayStartX + pointers.left * (layout.cellWidth + layout.gap) - layout.gap / 2;
+  const x = layout.nodesX + pointers.left * (layout.cellWidth + layout.gap) - layout.gap / 2;
   const width = (pointers.right - pointers.left + 1) * layout.cellWidth
     + (pointers.right - pointers.left) * layout.gap
     + layout.gap;
@@ -198,9 +200,9 @@ function drawDecisionConnectors(g: CanvasGroupSelection, pointers: PointerState,
   }
 
   const centers = [pointers.i, pointers.left, pointers.right].map(index =>
-    layout.arrayStartX + index * (layout.cellWidth + layout.gap) + layout.cellWidth / 2
+    layout.nodesX + index * (layout.cellWidth + layout.gap) + layout.cellWidth / 2
   );
-  const top = layout.arrayY + layout.cellHeight + 8;
+  const top = layout.arrowY;
   const arrowEnd = top + 38;
   const flows = [
     { id: 'i', x: centers[0], label: 'i 固定' },
@@ -316,7 +318,7 @@ function drawPointer(
   updateDuration: number
 ) {
   const color = POINTER_COLORS[key];
-  const pointerX = layout.arrayStartX + index * (layout.cellWidth + layout.gap) + layout.cellWidth / 2;
+  const pointerX = layout.nodesX + index * (layout.cellWidth + layout.gap) + layout.cellWidth / 2;
   const pointerGroup = g.selectAll<SVGGElement, string>(`.pointer.${key}`).data(index >= 0 ? [key] : []).join(enter => enter.append('g'), update => update, exit => exit.remove())
     .attr('class', `pointer ${key} ${active ? 'moving' : ''}`);
   if (index < 0) return;
@@ -379,8 +381,8 @@ function drawMovement(
     const to = current[key];
     if (from < 0 || to < 0 || from === to) return;
 
-    const x1 = layout.arrayStartX + from * (layout.cellWidth + layout.gap) + layout.cellWidth / 2;
-    const x2 = layout.arrayStartX + to * (layout.cellWidth + layout.gap) + layout.cellWidth / 2;
+    const x1 = layout.nodesX + from * (layout.cellWidth + layout.gap) + layout.cellWidth / 2;
+    const x2 = layout.nodesX + to * (layout.cellWidth + layout.gap) + layout.cellWidth / 2;
     const y = layout.arrayY + 78 + idx * 20;
     const color = key === 'right' ? POINTER_COLORS.right : POINTER_COLORS.left;
     const path = g.selectAll<SVGPathElement, string>(`.move-line.${key}`).data([key]).join('path')
@@ -418,7 +420,7 @@ function drawSkipMarkers(g: CanvasGroupSelection, step: AlgorithmStep, layout: C
   const markers = step.animationType === 'skip' ? step.arrayState.filter(item => item.highlight === 'skip') : [];
   g.selectAll<SVGGElement, AlgorithmStep['arrayState'][number]>('.skip-marker').data(markers, item => `skip-${item.originalIndex}`).join('g')
     .attr('class', 'skip-marker')
-    .attr('transform', item => `translate(${layout.arrayStartX + item.index * (layout.cellWidth + layout.gap)},${layout.arrayY})`)
+    .attr('transform', item => `translate(${layout.nodesX + item.index * (layout.cellWidth + layout.gap)},${layout.arrayY})`)
     .each(function drawMarker() {
       const marker = d3.select(this);
       marker.selectAll<SVGLineElement, string>('line').data(['a', 'b']).join('line')
@@ -434,21 +436,22 @@ function drawDecisionPanel(
   step: AlgorithmStep,
   pointers: PointerState
 ) {
-  const panelWidth = Math.min(410, layout.contentWidth - 24 - 322);
-  const panelGroupWidth = panelWidth + 24 + 322;
-  const panelX = layout.contentStartX + (layout.contentWidth - panelGroupWidth) / 2;
+  const panelWidth = layout.panelWidth;
+  const panelX = layout.panelX;
+  const panelY = layout.detailY;
+  const panelInset = 14;
   const panel = g.selectAll<SVGGElement, string>('.decision-panel').data(['decision']).join('g')
     .attr('class', 'info-panel decision-panel').attr('opacity', 1);
   panel.selectAll('rect.info-panel-bg').data(['background']).join('rect')
     .attr('x', panelX)
-    .attr('y', layout.detailY)
+    .attr('y', panelY)
     .attr('width', panelWidth)
     .attr('height', 108)
     .attr('rx', 8)
     .attr('class', 'info-panel-bg');
 
   panel.selectAll<SVGTextElement, string>('text.section-title').data(['title']).join('text')
-    .attr('x', panelX + 14).attr('y', layout.detailY + 24).attr('class', 'section-title').text('当前三数之和');
+    .attr('x', panelX + panelInset).attr('y', panelY + 24).attr('class', 'section-title').text('当前三数之和');
 
   const values = getPointerValues(step, pointers);
   const sum = step.decision?.sum ?? values.sum;
@@ -457,18 +460,18 @@ function drawDecisionPanel(
     : '等待进入双指针扫描';
 
   panel.selectAll<SVGTextElement, string>('text.formula-text').data([formulaText]).join('text')
-    .attr('x', panelX + 14).attr('y', layout.detailY + 52).attr('class', 'formula-text').text(value => value);
+    .attr('x', panelX + panelInset).attr('y', panelY + 52).attr('class', 'formula-text').text(value => value);
 
   const target = step.decision?.target;
   panel.selectAll<SVGTextElement, number>('text.target-text').data(target === undefined ? [] : [target]).join('text')
-    .attr('x', panelX + 14).attr('y', layout.detailY + 78).attr('class', 'target-text')
+    .attr('x', panelX + panelInset).attr('y', panelY + 78).attr('class', 'target-text')
     .text(value => `目标：left + right = ${value}`);
   panel.selectAll<SVGTextElement, string>('text.decision-explanation').data([step.narration || step.description]).join('text')
-    .attr('x', panelX + 14).attr('y', layout.detailY + 98).attr('class', 'decision-explanation')
+    .attr('x', panelX + panelInset).attr('y', panelY + 98).attr('class', 'decision-explanation')
     .text(value => value);
   const relation = step.decision?.relation;
   panel.selectAll<SVGTextElement, NonNullable<typeof relation>>('text.relation-pill').data(relation ? [relation] : []).join('text')
-    .attr('x', panelX + panelWidth - 84).attr('y', layout.detailY + 53)
+    .attr('x', panelX + panelWidth - 84).attr('y', panelY + 53)
     .attr('class', value => `relation-pill ${value}`).text(value => getRelationText(value));
 }
 
@@ -477,22 +480,18 @@ function drawVariables(
   layout: CanvasLayout,
   variables: AlgorithmStep['variables']
 ) {
-  const panelWidth = 322;
-  const panelGap = 24;
-  const decisionWidth = Math.min(410, layout.contentWidth - panelGap - panelWidth);
-  const groupWidth = decisionWidth + panelGap + panelWidth;
-  const x = layout.contentStartX + (layout.contentWidth - groupWidth) / 2 + decisionWidth + panelGap;
+  const panelY = layout.variablesY;
   const panel = g.selectAll<SVGGElement, string>('.vars-panel').data(['variables']).join('g')
     .attr('class', 'info-panel vars-panel').attr('opacity', 1);
   panel.selectAll<SVGRectElement, string>('rect.info-panel-bg').data(['background']).join('rect')
-    .attr('x', x).attr('y', layout.detailY).attr('width', 322).attr('height', 108).attr('rx', 8).attr('class', 'info-panel-bg');
+    .attr('x', layout.variablesX).attr('y', panelY).attr('width', 322).attr('height', 108).attr('rx', 8).attr('class', 'info-panel-bg');
   panel.selectAll<SVGTextElement, string>('text.section-title').data(['title']).join('text')
-    .attr('x', x + 14).attr('y', layout.detailY + 24).attr('class', 'section-title').text('变量状态');
+    .attr('x', layout.variablesX + 14).attr('y', panelY + 24).attr('class', 'section-title').text('变量状态');
 
   const visibleVars = variables.slice(0, 3);
   panel.selectAll<SVGTextElement, typeof visibleVars[number]>('text.var-text').data(visibleVars, variable => variable.name).join('text')
-    .attr('x', (_, idx) => x + 14 + (idx % 2) * 150)
-    .attr('y', (_, idx) => layout.detailY + 50 + Math.floor(idx / 2) * 24)
+    .attr('x', (_, idx) => layout.variablesX + 14 + (idx % 2) * 150)
+    .attr('y', (_, idx) => panelY + 50 + Math.floor(idx / 2) * 24)
     .attr('class', variable => `var-text ${variable.highlight ? 'highlight' : ''}`)
     .text(variable => `${variable.name}: ${formatValue(variable.value)}`);
 }
@@ -504,14 +503,14 @@ function drawResults(
 ) {
   const panel = g.selectAll<SVGGElement, string>('.result-group').data(['results']).join('g').attr('class', 'result-group');
   panel.selectAll<SVGTextElement, string>('text.result-title').data(['title']).join('text')
-    .attr('x', layout.contentStartX)
+    .attr('x', layout.resultsX)
     .attr('y', layout.resultY)
     .attr('class', 'section-title result-title')
     .text(`已找到三元组：${result.length} 组`);
 
   if (result.length === 0) {
     panel.selectAll<SVGTextElement, string>('text.empty-result').data(['empty']).join('text')
-      .attr('x', layout.contentStartX).attr('y', layout.resultY + 30).attr('class', 'empty-result')
+      .attr('x', layout.resultsX).attr('y', layout.resultY + 30).attr('class', 'empty-result')
       .text('暂无命中，继续移动指针搜索');
     panel.selectAll('.triplet-chip').remove();
     return;
@@ -527,7 +526,7 @@ function drawResults(
   ).each(function updateTriplet(triplet, idx) {
     const col = idx % columns;
     const row = Math.floor(idx / columns);
-    const tripletX = layout.contentStartX + col * (tripletWidth + 14);
+    const tripletX = layout.resultsX + col * (tripletWidth + 14);
     const tripletY = layout.resultY + 20 + row * 36;
     const group = d3.select(this).attr('opacity', 1);
     group.selectAll<SVGRectElement, string>('rect').data(['card']).join('rect')

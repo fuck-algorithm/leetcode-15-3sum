@@ -25,10 +25,10 @@
 .canvas-container svg:active,
 .canvas-container.is-dragging svg { cursor: grabbing; }
 .canvas-container.is-dragging { border-color: rgba(37, 99, 235, 0.42); }
-.canvas-toolbar { position: absolute; top: 8px; right: 8px; z-index: 2; display: flex; align-items: center; gap: 4px; padding: 4px; background: rgba(255,255,255,.94); border: 1px solid var(--border-color); border-radius: 6px; }
+.canvas-toolbar { position: absolute; top: 8px; right: auto; z-index: 2; display: flex; align-items: center; gap: 4px; padding: 4px; background: rgba(255,255,255,.94); border: 1px solid var(--border-color); border-radius: 6px; }
 .canvas-array-overview { position: absolute; right: 8px; bottom: 34px; z-index: 3; display: flex; align-items: center; gap: 8px; width: min(260px, calc(100% - 16px)); padding: 4px 8px; background: rgba(255,255,255,.95); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-secondary); font-size: 10px; }
 .canvas-array-overview input { flex: 1; min-width: 40px; accent-color: var(--primary-color); }
-.canvas-legend { position: absolute; z-index: 2; top: 8px; left: 8px; display: flex; gap: 8px; align-items: center; max-width: calc(100% - 190px); padding: 5px 8px; color: var(--text-secondary); background: rgba(255,255,255,.94); border: 1px solid var(--border-color); border-radius: 6px; font-size: 10px; }
+.canvas-legend { position: absolute; z-index: 2; top: 8px; left: 8px; display: flex; gap: 8px; align-items: center; max-width: min(var(--canvas-legend-width, 180px), calc(100% - 190px)); padding: 5px 8px; color: var(--text-secondary); background: rgba(255,255,255,.94); border: 1px solid var(--border-color); border-radius: 6px; font-size: 10px; }
 .canvas-metrics { pointer-events: none; }
 .metric-label { fill: var(--text-secondary); font-size: 10px; }
 .metric-value { fill: var(--text-primary); font-size: 10px; font-weight: 700; }

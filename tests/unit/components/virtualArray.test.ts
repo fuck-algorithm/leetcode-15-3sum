@@ -27,6 +27,18 @@ describe('virtual array window', () => {
     expect(panelGroupStart + panelGroupWidth / 2).toBe(460);
   });
 
+  it('reflows teaching panels and keeps controls clear on compact canvases', () => {
+    const step = generateSteps([-1, 0, 1, 2, -1, -4])[0];
+    const mobile = createCanvasLayout(step, { width: 390, height: 694 });
+    const tablet = createCanvasLayout(step, { width: 820, height: 760 });
+    expect(mobile.mobile).toBe(true);
+    expect(mobile.stageY).toBeGreaterThan(32);
+    expect(mobile.arrayY).toBeGreaterThan(mobile.stageY + mobile.stageHeight);
+    expect(mobile.variablesY).toBeGreaterThan(mobile.detailY + 108);
+    expect(tablet.variablesY).toBeGreaterThan(tablet.detailY + 108);
+    expect(tablet.variablesX).toBeGreaterThan(tablet.contentStartX);
+  });
+
   it('keeps long virtual arrays anchored to the scrollable canvas origin', () => {
     const step = generateSteps(Array.from({ length: 100 }, (_, index) => index - 50))[0];
     const layout = createCanvasLayout(step, { width: 920, height: 520 });

@@ -73,7 +73,7 @@ export function Canvas({ currentStep, playbackSpeed = 1 }: CanvasProps) {
         <div className="canvas-empty">暂无可展示步骤</div>
       )}
 
-      <div className="canvas-legend" aria-label="节点状态图例">
+      <div className="canvas-legend" style={{ '--canvas-legend-width': `${canvasLayout?.legendWidth ?? 180}px` } as React.CSSProperties} aria-label="节点状态图例">
         {legend.map(item => (
           <span className="canvas-legend-item" key={item.id}>
             <i className={`legend-swatch legend-swatch--${item.shape}`} aria-hidden="true" />{item.label}
@@ -97,7 +97,7 @@ export function Canvas({ currentStep, playbackSpeed = 1 }: CanvasProps) {
         </div>
       )}
 
-      <div className="canvas-toolbar" aria-label="画布缩放控制">
+      <div className="canvas-toolbar" style={{ left: `${canvasLayout?.toolbarLeft ?? 8}px` } as React.CSSProperties} aria-label="画布缩放控制">
         <button type="button" onClick={zoomOut} aria-label="缩小画布">-</button>
         <span>{Math.round(zoomLevel * 100)}%</span>
         <button type="button" onClick={zoomIn} aria-label="放大画布">+</button>
